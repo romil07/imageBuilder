@@ -1,0 +1,39 @@
+on: [push]
+  
+jobs:      
+  job1:
+    runs-on: ubuntu-latest
+    name: A job to use action to run aib action
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - shell: bash
+      run: mkdir -p homework
+    
+    - shell: bash
+      run: |
+          echo Hello World! > homework/hello-world.txt |
+          echo Hello World! > homework/hello-world2.txt
+    
+    - name: Login via Az module
+      uses: azure/login@v1.1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+    
+    - name: aib action
+      id: aib
+      uses: ./
+      with:
+        location: 'westus'
+        resourceGroupName: 'aibResourceGroupSIG'
+        sourceOSType: 'windows'
+        sourceImageType: 'marketplace'
+        sourceImage: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
+        customizerSource: '/home/runner/work/AIB_Action_1/AIB_Action_1/homework'
+        distributorType: 'sharedgalleryimage'
+        distResourceId: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn'
+        distLocation: 'westus'
+
+    - name: print aib output
+      run: echo output from aib ${{ steps.aib.outputs.imagebuilderRunStatus }} ${{ steps.aib.outputs.runOutputName }} ${{ steps.aib.outputs.customImageURI }}
