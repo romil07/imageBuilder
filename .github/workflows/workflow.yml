@@ -32,7 +32,7 @@ jobs:
         sourceImage: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
         customizerSource: '/home/runner/work/imageBuilder/homework'
         distributorType: 'sharedgalleryimage'
-        distResourceId: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/sharedImageGallery/images/rogoyalsig'
+        distResourceId: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/rogoyalsig/images/rogoyalimgdefn'
         distLocation: 'eastus'
 
     - name: print aib output
