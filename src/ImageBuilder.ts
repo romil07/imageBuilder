@@ -120,7 +120,7 @@ export default class ImageBuilder {
             }`;
             
             var templateJson = JSON.parse(template);
-            console.log(" stringify "+JSON.stringify(templateJson));
+            console.log(" Template Json ======================================================= \n "+ JSON.stringify(templateJson));
             fs.writeFileSync('./src/template.json', JSON.stringify(templateJson));
 
             await this.executeAzCliCommand(`role definition create --role-definition ./src/template.json`);

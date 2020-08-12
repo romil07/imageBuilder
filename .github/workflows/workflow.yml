@@ -25,15 +25,15 @@ jobs:
       id: aib
       uses: ./
       with:
-        location: 'westus'
-        resourceGroupName: 'aibResourceGroupSIG'
+        location: 'eastus'
+        resourceGroupName: 'rogoyal'
         sourceOSType: 'windows'
         sourceImageType: 'marketplace'
         sourceImage: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
         customizerSource: '/home/runner/work/AIB_Action_1/AIB_Action_1/homework'
         distributorType: 'sharedgalleryimage'
-        distResourceId: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn'
-        distLocation: 'westus'
+        distResourceId: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/sharedImageGallery/images/rogoyalsig'
+        distLocation: 'eastus'
 
     - name: print aib output
       run: echo output from aib ${{ steps.aib.outputs.imagebuilderRunStatus }} ${{ steps.aib.outputs.runOutputName }} ${{ steps.aib.outputs.customImageURI }}
