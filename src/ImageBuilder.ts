@@ -221,11 +221,11 @@ export default class ImageBuilder {
         try {
             if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
                 archivedWebPackage = await this.createArchiveTar1(this._taskParameters.buildPath,
-                    this._generateTemporaryFile('/home/runner/work/AIB_Action_1/AIB_Action_1/', `.zip`));
+                    this._generateTemporaryFile('/home/runner/work/imageBuilder/', `.zip`));
             }
             else {
                 archivedWebPackage = await this.createArchiveTar(this._taskParameters.buildPath,
-                    this._generateTemporaryFile('/home/runner/work/AIB_Action_1/AIB_Action_1/', `.tar.gz`));
+                    this._generateTemporaryFile('/home/runner/work/imageBuilder/', `.tar.gz`));
             }
         }
         catch (error) {
