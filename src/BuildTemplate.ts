@@ -107,9 +107,11 @@ export default class BuildTemplate {
         else
             templateJson.properties.source.imageVersionId = this._taskParameters.imageVersionId;
 
+        console.log("Provisioner = " + this._taskParameters.provisioner);
         // customize
         if (Utils.IsEqual(this._taskParameters.provisioner, "shell")) {
             var inline: string = "#\n";
+            console.log("Inside shell Provisioner");
             var packageName = path.join(this._taskParameters.customizerDestination, this._taskParameters.buildFolder);
             templateJson.properties.customize[0].sourceUri = blobUrl;
             templateJson.properties.customize[0].destination = `${packageName}.tar.gz`;
@@ -120,15 +122,19 @@ export default class BuildTemplate {
             templateJson.properties.customize[1].inline = inline.split("\n");
         }
         else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
-            var packageName = this._taskParameters.customizerDestination + this._taskParameters.buildFolder;
+            console.log("Inside shell Provisioner");
+            var packageName = path.join(this._taskParameters.customizerDestination, this._taskParameters.buildFolder);
             // create buildartifacts folder
             var inline = `New-item -Path c:\\ -itemtype directory\n`
             // download zip
             inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
             // unzip
             inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
+            console.log("Inside shell Provisioner. Script = " + inline);
             if (this._taskParameters.inlineScript)
                 inline += `${this._taskParameters.inlineScript}\n`;
+            
+            console.log("Properties: \n" + JSON.stringify(templateJson.properties));
             templateJson.properties.customize[0].inline = inline.split("\n");
         }
 
