@@ -47,6 +47,7 @@ export default class ImageBuilder {
             this._buildTemplate = new BuildTemplate(resourceAuthorizer, this._taskParameters);
             this._aibClient = new ImageBuilderClient(resourceAuthorizer, this._taskParameters);
             this._client = new AzureRestClient(resourceAuthorizer);
+            this.idenityName = this._taskParameters.managedIdentity;
         }
         catch (error) {
             throw (`error happened while initializing Image builder: ${error}`);
