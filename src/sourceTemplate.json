@@ -2,7 +2,7 @@
     "type": "Microsoft.VirtualMachineImages/imageTemplates",
     "location": "eastus",
     "tags": {
-        "imagebuilderTemplate": "AzureImageBuilderSIG-userProvidedTemplateNew2",
+        "imagebuilderTemplate": "AzureImageBuilderSIG-userProvidedTemplateNewgdsrfg2",
         "userIdentity": "enabled"
     },
     "identity": {
