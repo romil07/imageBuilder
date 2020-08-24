@@ -81,6 +81,7 @@ export default class ImageBuilder {
                     await this.executeAzCliCommand(`group create -n ${resourceGroupName} -l ${this._taskParameters.location}`);
                 }
 
+                console.log("identity-name = " + this.idenityName);
                 imgBuilderId = `/subscriptions/${subscriptionId}/resourcegroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${this.idenityName}`;
                 this.principalId = JSON.parse(await this.executeAzCliCommand(`identity show --resource-group ${this._taskParameters.resourceGroupName} --name ${this.idenityName}`)).principalId;
 
