@@ -122,8 +122,8 @@ export default class ImageBuilder {
                 core.debug("Blob Url: " + blobUrl);
 
                 // create role assignment for storage account
-                await this.executeAzCliCommand(`role assignment create --assignee-object-id ${this.principalId} --role "Storage Blob Data Reader" --scope /subscriptions/${subscriptionId}/resourceGroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${this.storageAccount}/blobServices/default/containers/${this.containerName}`);
-                roleAssignmentForStorageAccountExists = true;
+                // await this.executeAzCliCommand(`role assignment create --assignee-object-id ${this.principalId} --role "Storage Blob Data Reader" --scope /subscriptions/${subscriptionId}/resourceGroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${this.storageAccount}/blobServices/default/containers/${this.containerName}`);
+                // roleAssignmentForStorageAccountExists = true;
             }
 
             let templateJson: any = "";
@@ -180,7 +180,7 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
-                this.cleanup(this.isVhdDistribute, this.templateName, this.imgBuilderTemplateExists, subscriptionId, this.storageAccount, this.containerName, this.accountkeys, this.idenityName, this.principalId, this.imageRoleDefName);
+                //this.cleanup(this.isVhdDistribute, this.templateName, this.imgBuilderTemplateExists, subscriptionId, this.storageAccount, this.containerName, this.accountkeys, this.idenityName, this.principalId, this.imageRoleDefName);
             }
         }
     }
