@@ -32,7 +32,7 @@ jobs:
         location: 'eastus'
         resource-group-name: 'rogoyaltest'
         managed-identity: 'rogoyal-identity'
-        # image-builder-template-name: '/home/runner/work/AIB_Action/AIB_Action/src/sigTemplate.json'
+        image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
         source-os-type: 'windows'
         source-image-type: 'marketplace'
         source-image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest'
