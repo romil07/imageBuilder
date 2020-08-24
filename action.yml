@@ -19,6 +19,8 @@ inputs:
    vmProfile:
       description: 'You can override the VM size, from the default value i.e. Standard_D1_v2.'
       default: 'Standard_D1_v2'
+   managed-identity:
+      description: 'The identity that will be used to do the role assignment and resource creation'
    
    #source inputs
    source-image-type:
