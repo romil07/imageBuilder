@@ -92,6 +92,7 @@ export default class BuildTemplate {
         console.log("Template String: \n" + template);
 
         var templateJson = JSON.parse(template);
+        console.log("Parsed Template String: \n");
         templateJson.location = this._taskParameters.location;
         if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
             templateJson.properties.source.publisher = this._taskParameters.imagePublisher;
