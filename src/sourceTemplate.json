@@ -1,10 +1,6 @@
 {
     "type": "Microsoft.VirtualMachineImages/imageTemplates",
     "location": "eastus",
-    "tags": {
-        "imagebuilderTemplate": "AzureImageBuilderSIG-userProvidedTemplateNewgdsrfg2",
-        "userIdentity": "enabled"
-    },
     "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
@@ -25,18 +21,6 @@
             "version": "latest"
         },
         "customize": [
-            {
-                "type": "File",
-                "name": "CustomSource1598203377295",
-                "sourceUri": "https://github.com/anukgupt/AIB_Action/raw/master/artifacts/homework_1598203373203.zip",
-                "destination": "c:\\"
-            },
-            {
-                "type": "File",
-                "name": "CustomSource1598203377297",
-                "sourceUri": "https://github.com/anukgupt/AIB_Action/raw/master/artifacts/homework_1598203373202.zip",
-                "destination": "c:\\abc.zip"
-            },
             {
                 "type": "PowerShell",
                 "name": "CreateBuildPath",
