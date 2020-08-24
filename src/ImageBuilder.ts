@@ -120,10 +120,6 @@ export default class ImageBuilder {
 
                 blobUrl = await this.uploadPackage(this.containerName, blobName);
                 core.debug("Blob Url: " + blobUrl);
-
-                // create role assignment for storage account
-                // await this.executeAzCliCommand(`role assignment create --assignee-object-id ${this.principalId} --role "Storage Blob Data Reader" --scope /subscriptions/${subscriptionId}/resourceGroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${this.storageAccount}/blobServices/default/containers/${this.containerName}`);
-                // roleAssignmentForStorageAccountExists = true;
             }
 
             let templateJson: any = "";
@@ -144,34 +140,34 @@ export default class ImageBuilder {
 
             var templateStr = JSON.stringify(templateJson);
             console.log("Template json: \n" + templateStr);
-            await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
-            this.imgBuilderTemplateExists = true;
+            // await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
+            // this.imgBuilderTemplateExists = true;
 
-            await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
-            var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
-            var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
-            core.setOutput('templateName', this.templateName);
-            core.setOutput('templateId', templateID);
-            if (out) {
-                core.setOutput('customImageURI', out);
-                core.setOutput('imagebuilderRunStatus', "succeeded");
-            }
+            // await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
+            // var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
+            // var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
+            // core.setOutput('templateName', this.templateName);
+            // core.setOutput('templateId', templateID);
+            // if (out) {
+            //     core.setOutput('customImageURI', out);
+            //     core.setOutput('imagebuilderRunStatus', "succeeded");
+            // }
 
-            if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
-                core.setOutput('pirPublisher', templateJson.properties.source.publisher);
-                core.setOutput('pirOffer', templateJson.properties.source.offer);
-                core.setOutput('pirSku', templateJson.properties.source.sku);
-                core.setOutput('pirVersion', templateJson.properties.source.version);
-            }
+            // if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
+            //     core.setOutput('pirPublisher', templateJson.properties.source.publisher);
+            //     core.setOutput('pirOffer', templateJson.properties.source.offer);
+            //     core.setOutput('pirSku', templateJson.properties.source.sku);
+            //     core.setOutput('pirVersion', templateJson.properties.source.version);
+            // }
 
-            console.log("==============================================================================")
-            console.log("## task output variables ##");
-            console.log("$(imageUri) = ", out);
-            if (this.isVhdDistribute) {
-                console.log("$(templateName) = ", this.templateName);
-                console.log("$(templateId) = ", templateID);
-            }
-            console.log("==============================================================================")
+            // console.log("==============================================================================")
+            // console.log("## task output variables ##");
+            // console.log("$(imageUri) = ", out);
+            // if (this.isVhdDistribute) {
+            //     console.log("$(templateName) = ", this.templateName);
+            //     console.log("$(templateId) = ", templateID);
+            // }
+            // console.log("==============================================================================")
 
         }
         catch (error) {
@@ -291,7 +287,7 @@ export default class ImageBuilder {
         catch (error) {
             defer.reject(console.log(`unable to create archive build: ${error}`));
         }
-        console.log(`created  archive ` + archivedWebPackage);
+        console.log(`created archive ` + archivedWebPackage);
 
         this._blobService.createContainerIfNotExists(containerName, (error: any) => {
             if (error) {
