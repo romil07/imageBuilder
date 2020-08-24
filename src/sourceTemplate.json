@@ -74,7 +74,7 @@
         "distribute": [
             {
                 "type": "SharedImage",
-                "galleryImageId": "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/rogoyalsignew/images/rogoyaldefwindows",
+                "galleryImageId": "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn",
                 "runOutputName": "userProvidedTemplateWindowsRun",
                 "artifactTags": {
                     "source": "azureVmImageBuilder",
