@@ -8,7 +8,7 @@
     "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-            "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.ManagedIdentity/userAssignedIdentities/rogoyal-managedIdentity": {}
+            "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/rogoyal-identity": {}
         }
     },
     "properties": {
