@@ -3,124 +3,139 @@ import path = require("path");
 import * as tl from '@actions/core';
 import * as constants from "./constants";
 import Utils from "./Utils";
-var defaultPublisher = "Publisher:Offer:Sku"
+var fs = require('fs');
 
 export default class TaskParameters {
     // image builder inputs
     public resourceGroupName: string;
     public location: string = "";
     public imagebuilderTemplateName: string;
+    public isTemplateJsonProvided: boolean = false;
+    public templateJsonFromUser: string = '';
     public nowaitMode: string;
-    public buildTimeoutInMinutes: string;
+    public buildTimeoutInMinutes: number = 80;
     public vmSize: string = "";
+    public managedIdentity: string = "";
 
     // source
     public sourceImageType: string;
     public sourceOSType: string;
-    public sourceResourceId: string = " ";
-    public imageVersionId: string = " ";
-    public baseImageVersion: string = " ";
-    public imagePublisher: string = " ";
-    public imageOffer: string = " ";
-    public imageSku: string = " ";
+    public sourceResourceId: string = "";
+    public imageVersionId: string = "";
+    public baseImageVersion: string = "";
+    public imagePublisher: string = "";
+    public imageOffer: string = "";
+    public imageSku: string = "";
 
     //customize
     public buildPath: string;
     public buildFolder: string;
     public blobName: string = "";
     public inlineScript: string;
-    public provisioner: string = " ";
+    public provisioner: string = "";
     public windowsUpdateProvisioner: boolean;
     //??
-    public storageAccountName: string = " ";
+    public storageAccountName: string = "";
 
-    public customizerSource: string = " ";
-    public customizerDestination: string = " ";
-    public customizerScript: string = " ";
-    public customizerWindowsUpdate: string = " ";
+    public customizerSource: string = "";
+    public customizerDestination: string = "";
+    public customizerScript: string = "";
+    public customizerWindowsUpdate: string = "";
 
     //distribute
     public distributeType: string;
-    public imageIdForDistribute: string = " ";
-    public replicationRegions: string = " ";
-    public managedImageLocation: string = " ";
-    public galleryImageId: string = " ";
+    public imageIdForDistribute: string = "";
+    public replicationRegions: string = "";
+    public managedImageLocation: string = "";
+    public galleryImageId: string = "";
     public runOutputName: string;
 
     constructor() {
         var locations = ["eastus", "eastus2", "westcentralus", "westus", "westus2", "northeurope", "westeurope"];
-        // generl inputs
+        // general inputs
         console.log("start reading task parameters...");
         this.location = tl.getInput(constants.Location, { required: true });
 
-        if (!(locations.indexOf(this.location.toString()) > -1)) {
+        if (!(locations.indexOf(this.location.toString().replace(/\s/g, "").toLowerCase()) > -1)) {
             throw new Error("location not from available regions or it is not defined");
         }
-        this.resourceGroupName = tl.getInput(constants.ResourceGroupName);
+        this.resourceGroupName = tl.getInput(constants.ResourceGroupName, {required: true});
+        this.managedIdentity = tl.getInput(constants.ManagedIdentity, {required: true});
         this.imagebuilderTemplateName = tl.getInput(constants.ImageBuilderTemplateName);
+        if (this.imagebuilderTemplateName.indexOf("json") > -1) {
+            this.isTemplateJsonProvided = true;
+            var data = fs.readFileSync(this.imagebuilderTemplateName, 'utf8');
+            this.templateJsonFromUser = JSON.parse(JSON.stringify(data));
+            console.log(this.templateJsonFromUser);
+        }
         this.nowaitMode = tl.getInput(constants.NoWaitMode);
-        this.buildTimeoutInMinutes = tl.getInput(constants.BuildTimeoutInMinutes);
+        this.buildTimeoutInMinutes = parseInt(tl.getInput(constants.BuildTimeoutInMinutes));
         //vm size
-        //this.vmSize = tl.getInput(constants.VMSize);
-
+        this.vmSize = tl.getInput(constants.VMSize);
+        if (this.vmSize == undefined || this.vmSize == "") {
+            this.vmSize = "Standard_D1_v2";
+        }
 
         //source inputs
         this.sourceImageType = tl.getInput(constants.SourceImageType);
-        this.sourceOSType = tl.getInput(constants.SourceOSType);
-        const sourceImage = tl.getInput(constants.SourceImage);
+        this.sourceOSType = tl.getInput(constants.SourceOSType, { required: true });
+        const sourceImage = tl.getInput(constants.SourceImage, { required: true });
 
-        // if (Utils.IsEqual(this.sourceImageType, constants.marketPlaceSourceTypeImage) || Utils.IsEqual(this.sourceImageType, constants.platformImageSourceTypeImage)) {
-        if (this.sourceImageType == "marketplace") {
+        if (Utils.IsEqual(this.sourceImageType, constants.marketPlaceSourceTypeImage) || Utils.IsEqual(this.sourceImageType, constants.platformImageSourceTypeImage)) {
             this.sourceImageType = constants.marketPlaceSourceTypeImage;
             this._extractImageDetails(sourceImage);
         }
-        // else if (Utils.IsEqual(this.sourceImageType, constants.managedImageSourceTypeImage)) {
-        else if (this.sourceImageType == "ManagedImage") {
-            this.imageVersionId = sourceImage;
+        else if (Utils.IsEqual(this.sourceImageType, constants.managedImageSourceTypeImage)) {
+            this.sourceResourceId = sourceImage;
         }
         else {
-            this.sourceResourceId = sourceImage;
+            this.imageVersionId = sourceImage;
         }
 
         //customize inputs
-        var bp = tl.getInput(constants.CustomizerSource).toString();
+        this.customizerSource = tl.getInput(constants.CustomizerSource).toString();
+        if (this.customizerSource == undefined || this.customizerSource == "") {
+            var artifactsPath = path.join(`${process.env.GITHUB_WORKSPACE}`, "imageArtifacts");
+            if (fs.existsSync(artifactsPath)) {
+                this.customizerSource = artifactsPath;
+            }
+        }
+        this.customizerScript = tl.getInput(constants.customizerScript).toString();
 
+        var bp = this.customizerSource;
         var x = bp.split(path.sep);
         this.buildFolder = x[x.length - 1];
         this.buildPath = path.normalize(bp.trim());
-        console.log("found build at: ", this.buildPath + " and build folder is" + this.buildFolder);
-
         this.customizerDestination = tl.getInput(constants.customizerDestination);
-        //customizerDestination default value =linux or dependent on sourceostype??
-        if (this.customizerDestination == null || this.customizerDestination == undefined || this.customizerDestination.length == 0) {
-            this.customizerDestination = this.sourceOSType;
-        }
-        if (this.customizerDestination.toLowerCase() === "windows") {
+        if (Utils.IsEqual(this.sourceOSType, "windows")) {
             this.provisioner = "powershell";
+            if (this.customizerDestination == undefined || this.customizerDestination == null || this.customizerDestination == "") {
+                this.customizerDestination = "c:\\";
+            }
         }
         else {
             this.provisioner = "shell";
+            if (this.customizerDestination == undefined || this.customizerDestination == null || this.customizerDestination == "") {
+                this.customizerDestination = "/tmp/";
+            }
         }
         this.inlineScript = tl.getInput(constants.customizerScript);
-        if(tl.getInput(constants.customizerWindowsUpdate)=="true") {
+        if (Utils.IsEqual(tl.getInput(constants.customizerWindowsUpdate), "true")) {
             this.windowsUpdateProvisioner = true;
         }
         else {
             this.windowsUpdateProvisioner = false;
         }
-        // this.windowsUpdateProvisioner = Boolean(tl.getInput(constants.customizerWindowsUpdate));
 
         //distribute inputs
         this.distributeType = tl.getInput(constants.DistributeType);
         const distResourceId = tl.getInput(constants.DistResourceId);
         const distLocation = tl.getInput(constants.DistLocation);
         if (Utils.IsEqual(this.distributeType, constants.managedImageSourceTypeImage)) {
-        // if (this.distributeType == "ManagedImage") {
             this.imageIdForDistribute = distResourceId;
             this.managedImageLocation = distLocation;
         }
         else if (Utils.IsEqual(this.distributeType, constants.sharedImageGallerySourceTypeImage)) {
-            // else {
             this.galleryImageId = distResourceId;
             this.replicationRegions = distLocation;
         }
@@ -135,12 +150,12 @@ export default class TaskParameters {
         this.imageSku = "";
         this.baseImageVersion
         var parts = img.split(':');
-        if (parts.length != 4)
+        if (parts.length != 4) {
             throw Error("Platform Base Image should have '{publisher}:{offer}:{sku}:{version}'. All fields are required.")
+        }
         this.imagePublisher = parts[0];
         this.imageOffer = parts[1];
         this.imageSku = parts[2];
         this.baseImageVersion = parts[3];
-        console.log("SOURCE  IMAGE " + this.imagePublisher + " " + this.imageOffer + " " + this.imageSku + " " + this.baseImageVersion);
     }
 }

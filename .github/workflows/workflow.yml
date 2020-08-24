@@ -1,39 +1,46 @@
-on: [push]
-  
-jobs:      
+name: CI
+on:
+  push:
+    branches: [ master ]
+
+jobs:
   job1:
     runs-on: ubuntu-latest
     name: A job to use action to run aib action
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    
-    - shell: bash
-      run: mkdir -p homework
-    
-    - shell: bash
-      run: |
-          echo Hello World! > homework/hello-world.txt |
-          echo Hello World! > homework/hello-world2.txt
-    
+
     - name: Login via Az module
       uses: azure/login@v1.1
       with:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
-    
-    - name: aib action
+        creds: ${{secrets.AZURE_CREDS}}
+
+    - shell: bash
+      run: |
+        mkdir -p homework
+        echo 'hello world' > homework/helloworld1.txt
+        pwd
+        ls -a
+        echo $GITHUB_WORKSPACE
+
+
+    - name: Azure Image Builder Action
       id: aib
       uses: ./
       with:
         location: 'eastus'
-        resourceGroupName: 'rogoyal'
-        sourceOSType: 'windows'
-        sourceImageType: 'marketplace'
-        sourceImage: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
-        customizerSource: '/home/runner/work/imageBuilder/homework'
-        distributorType: 'sharedgalleryimage'
-        distResourceId: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/rogoyalsig/images/rogoyalimgdefn'
-        distLocation: 'eastus'
+        resource-group-name: 'rogoyaltest'
+        managed-identity: rogoyal-managedIdentity
+        # image-builder-template-name: '/home/runner/work/AIB_Action/AIB_Action/src/sigTemplate.json'
+        source-os-type: 'windows'
+        source-image-type: 'marketplace'
+        source-image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest'
+        customizer-source: '$GITHUB_WORKSPACE/homework'
+        customizer-script: 'mkdir C:\\rogoyaltest'
+        distributor-type: 'sharedgalleryimage'
+        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn'
+        dist-location: 'eastus'
 
     - name: print aib output
       run: echo output from aib ${{ steps.aib.outputs.imagebuilderRunStatus }} ${{ steps.aib.outputs.runOutputName }} ${{ steps.aib.outputs.customImageURI }}

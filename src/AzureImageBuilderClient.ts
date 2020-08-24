@@ -11,7 +11,7 @@ export default class ImageBuilderClient {
     private _client: AzureRestClient;
     private _taskParameters: TaskParameters;
 
-        constructor(resourceAuthorizer: IAuthorizer,  taskParameters: TaskParameters) {
+    constructor(resourceAuthorizer: IAuthorizer, taskParameters: TaskParameters) {
         this._client = new AzureRestClient(resourceAuthorizer);
         this._taskParameters = taskParameters;
     }
@@ -31,92 +31,89 @@ export default class ImageBuilderClient {
                 resourceId = response.body.id;
         }
         catch (error) {
-            throw Error(`get template call failed for template ${templateName} with error: `+error.toString());
+            throw Error(`Get template call failed for template ${templateName} with error: ${JSON.stringify(error)}`);
         }
         return resourceId;
     }
 
     public async putImageTemplate(template: string, templateName: string, subscriptionId: string) {
-        console.log("starting put template...");
+        console.log("Submitting the template");
         let httpRequest: WebRequest = {
             method: 'PUT',
             uri: this._client.getRequestUri(`/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imagetemplates/{imageTemplateName}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{imageTemplateName}': templateName }, [], apiVersion),
             body: template
         };
-        
+
         try {
             var response = await this._client.beginRequest(httpRequest);
-            console.log("response.statusCode "+response.statusCode+"   msg "+response.statusMessage+"  bodu "+response.body)
             if (response.statusCode == 201) {
                 response = await this.getLongRunningOperationResult(response);
             }
             if (response.statusCode != 200 || response.body.status == "Failed") {
-                console.log("error in put template ");
                 throw ToError(response);
             }
             if (response.statusCode == 200 && response.body && response.body.status == "Succeeded") {
-                console.log("put template: ", response.body.status);
+                console.log("Submitted template: \n", response.body.status);
             }
         }
         catch (error) {
-            throw Error(`put template call failed for template ${templateName} with error: ${error}`);
+            throw Error(`Submit template call failed for template ${templateName} with error: ${JSON.stringify(error)}`);
         }
     }
 
     /**
      * postTemplate
      */
-    public async runTemplate(templateName: string, subscriptionId: string) {
+    public async runTemplate(templateName: string, subscriptionId: string, timeOutInMinutes: number) {
         try {
-            console.log("starting run template...");
+            console.log("Starting run template...");
             let httpRequest: WebRequest = {
                 method: 'POST',
                 uri: this._client.getRequestUri(`/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imagetemplates/{imageTemplateName}/run`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{imageTemplateName}': templateName }, [], apiVersion)
             };
-           
+
             var response = await this._client.beginRequest(httpRequest);
-            if(response.statusCode == 202) {
-                response = await this.getLongRunningOperationResult(response);
+            if (response.statusCode == 202) {
+                response = await this.getLongRunningOperationResult(response, timeOutInMinutes);
             }
-            if(response.statusCode != 200 || response.body.status == "Failed") {
+            if (response.statusCode != 200 || response.body.status == "Failed") {
                 throw ToError(response);
             }
-            if(response.statusCode == 200 && response.body && response.body.status == "Succeeded") {
-                console.log("run template: ", response.body.status);
+            if (response.statusCode == 200 && response.body && response.body.status == "Succeeded") {
+                console.log("Run template: \n", response.body.status);
             }
         }
         catch (error) {
-            throw Error(`post template call failed for template ${templateName} with error: ${error}`);
+            throw Error(`Post template call failed for template ${templateName} with error: ${JSON.stringify(error)}`);
         }
     }
 
     public async deleteTemplate(templateName: string, subscriptionId: string) {
         try {
-            console.log(`deleting template ${templateName}...`);
+            console.log(`Deleting template ${templateName}...`);
             let httpRequest: WebRequest = {
                 method: 'DELETE',
                 uri: this._client.getRequestUri(`/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imagetemplates/{imageTemplateName}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{imageTemplateName}': templateName }, [], apiVersion)
             };
             var response = await this._client.beginRequest(httpRequest);
-            if(response.statusCode == 202) {
+            if (response.statusCode == 202) {
                 response = await this.getLongRunningOperationResult(response);
             }
-            if(response.statusCode != 200 || response.body.status == "Failed") {
+            if (response.statusCode != 200 || response.body.status == "Failed") {
                 throw ToError(response);
             }
 
-            if(response.statusCode == 200 && response.body && response.body.status == "Succeeded") {
-                console.log("delete template: ", response.body.status);
+            if (response.statusCode == 200 && response.body && response.body.status == "Succeeded") {
+                console.log("Delete template: ", response.body.status);
             }
         }
         catch (error) {
-            throw Error(`post template call failed for template ${templateName} with error: ${error}`);
+            throw Error(`Delete template call failed for template ${templateName} with error: ${JSON.stringify(error)}`);
         }
     }
 
 
     public async getRunOutput(templateName: string, runOutput: string, subscriptionId: string): Promise<string> {
-        console.log("getting runOutput for ", runOutput);
         let httpRequest: WebRequest = {
             method: 'GET',
             uri: this._client.getRequestUri(`/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imagetemplates/{imageTemplateName}/runOutputs/{runOutput}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{imageTemplateName}': templateName, '{runOutput}': runOutput }, [], apiVersion)
@@ -124,24 +121,24 @@ export default class ImageBuilderClient {
         var output: string = "";
         try {
             var response = await this._client.beginRequest(httpRequest);
-            if(response.statusCode != 200 || response.body.status == "Failed")
+            if (response.statusCode != 200 || response.body.status == "Failed")
                 throw ToError(response);
-            if(response.statusCode == 200 && response.body){
-                if(response.body && response.body.properties.artifactId)
+            if (response.statusCode == 200 && response.body) {
+                if (response.body && response.body.properties.artifactId)
                     output = response.body.properties.artifactId;
-                else if(response.body && response.body.properties.artifactUri)
+                else if (response.body && response.body.properties.artifactUri)
                     output = response.body.properties.artifactUri;
                 else
                     console.log(`Error to parse response.body -- ${response.body}.`);
             }
         }
         catch (error) {
-            throw Error(`error happened while initializing Image builder: ${error}`);
+            throw Error(`Get runOutput call failed for template ${templateName} for ${runOutput} with error: ${JSON.stringify(error)}`);
         }
         return output;
     }
 
-    public async getLongRunningOperationResult(response :WebResponse, timeoutInMinutes?: number): Promise<WebResponse> {
+    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes?: number): Promise<WebResponse> {
         var longRunningOperationRetryTimeout = !!timeoutInMinutes ? timeoutInMinutes : 0;
         timeoutInMinutes = timeoutInMinutes || longRunningOperationRetryTimeout;
         var timeout = new Date().getTime() + timeoutInMinutes * 60 * 1000;
@@ -154,19 +151,19 @@ export default class ImageBuilderClient {
         if (!httpRequest.uri) {
             throw new Error("InvalidResponseLongRunningOperation");
         }
-        
+
         if (!httpRequest.uri) {
-            console.log("ERROR IN URI "+httpRequest.uri);
+            console.log("error in uri " + httpRequest.uri);
         }
         while (true) {
             var response = await this._client.beginRequest(httpRequest);
             if (response.statusCode === 202 || (response.body && (response.body.status == "Accepted" || response.body.status == "Running" || response.body.status == "InProgress"))) {
-                if(response.body && response.body.status) {
+                if (response.body && response.body.status) {
                     core.debug(response.body.status);
                 }
                 // If timeout; throw;
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
-                    console.log("ERROR IN URI "+response.body.status);
+                    throw Error(`error in url`);
                 }
 
                 // Retry after given interval.
@@ -181,7 +178,7 @@ export default class ImageBuilderClient {
     }
 
     private sleepFor(sleepDurationInSeconds: any): Promise<any> {
-        return new Promise((resolve, reeject) => {
+        return new Promise((resolve, reject) => {
             setTimeout(resolve, sleepDurationInSeconds * 1000);
         });
     }

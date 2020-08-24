@@ -1,0 +1,89 @@
+{
+    "type": "Microsoft.VirtualMachineImages/imageTemplates",
+    "location": "eastus",
+    "tags": {
+        "imagebuilderTemplate": "AzureImageBuilderSIG-userProvidedTemplateNew2",
+        "userIdentity": "enabled"
+    },
+    "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+            "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.ManagedIdentity/userAssignedIdentities/rogoyal-managedIdentity": {}
+        }
+    },
+    "properties": {
+        "buildTimeoutInMinutes": 100,
+        "vmProfile": {
+            "vmSize": "Standard_D1_v2",
+            "osDiskSizeGB": 136
+        },
+        "source": {
+            "type": "PlatformImage",
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-Datacenter",
+            "version": "latest"
+        },
+        "customize": [
+            {
+                "type": "File",
+                "name": "CustomSource1598203377295",
+                "sourceUri": "https://github.com/anukgupt/AIB_Action/raw/master/artifacts/homework_1598203373203.zip",
+                "destination": "c:\\"
+            },
+            {
+                "type": "File",
+                "name": "CustomSource1598203377297",
+                "sourceUri": "https://github.com/anukgupt/AIB_Action/raw/master/artifacts/homework_1598203373202.zip",
+                "destination": "c:\\abc.zip"
+            },
+            {
+                "type": "PowerShell",
+                "name": "CreateBuildPath",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"
+            },
+            {
+                "type": "WindowsRestart",
+                "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\buildArtifacts\\azureImageBuilderRestart.txt",
+                "restartTimeout": "5m"
+            },
+            {
+                "type": "File",
+                "name": "downloadBuildArtifacts",
+                "sourceUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+                "destination": "c:\\buildArtifacts\\index.html"
+            },
+            {
+                "type": "PowerShell",
+                "name": "settingUpMgmtAgtPath",
+                "inline": [
+                    "mkdir c:\\buildActions",
+                    "echo Azure-Image-Builder-Was-Here  > c:\\buildActions\\buildActionsOutput.txt"
+                ]
+            },
+            {
+                "type": "WindowsUpdate",
+                "searchCriteria": "IsInstalled=0",
+                "filters": [
+                    "exclude:$_.Title -like '*Preview*'",
+                    "include:$true"
+                ],
+                "updateLimit": 40
+            }
+        ],
+        "distribute": [
+            {
+                "type": "SharedImage",
+                "galleryImageId": "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/rogoyalsignew/images/rogoyaldefwindows",
+                "runOutputName": "userProvidedTemplateWindowsRun",
+                "artifactTags": {
+                    "source": "azureVmImageBuilder",
+                    "baseosimg": "windows2019"
+                },
+                "replicationRegions": [
+                    "eastus"
+                ]
+            }
+        ]
+    }
+}
