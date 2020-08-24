@@ -30,7 +30,7 @@ jobs:
       with:
         location: 'eastus'
         resource-group-name: 'rogoyaltest'
-        managed-identity: 'rogoyal-managedIdentity'
+        managed-identity: 'rogoyal-identity'
         # image-builder-template-name: '/home/runner/work/AIB_Action/AIB_Action/src/sigTemplate.json'
         source-os-type: 'windows'
         source-image-type: 'marketplace'
