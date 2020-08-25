@@ -57,7 +57,7 @@ jobs:
         managed-identity: 'aibIdentitySIGLin'
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
-        #imagebuilder-template-name: 'imagetemplatesiglinux'
+        imagebuilder-template-name: 'imagetemplatesiglinba'
         #imagebuilder-template-name: '/home/runner/work/AIB_Action/AIB_Action/src/sourceTemplate.json'
         source-os-type: 'linux'
         source-image-type: 'SharedGalleryImage'

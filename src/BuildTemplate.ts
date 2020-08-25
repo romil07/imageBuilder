@@ -114,7 +114,8 @@ export default class BuildTemplate {
             console.log("packages name " + packageName);
             templateJson.properties.customize[0].sourceUri = blobUrl;
             templateJson.properties.customize[0].destination = `${packageName}.tar.gz`;
-            inline += `sudo mkdir -p ${packageName}\n`
+            // inline += `sudo mkdir -p ${packageName}\n`
+            inline += `sudo mkdir -p ${this._taskParameters.customizerDestination}\n`
             inline += `sudo tar -xzvf ${templateJson.properties.customize[0].destination} -C ${packageName}\n`
             if (this._taskParameters.inlineScript)
                 inline += `${this._taskParameters.inlineScript}\n`;
