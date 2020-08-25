@@ -7,15 +7,15 @@ var fs = require('fs');
 
 export default class TaskParameters {
     // image builder inputs
-    public resourceGroupName: string;
     public location: string = "";
+    public resourceGroupName: string;
+    public managedIdentity: string = "";
     public imagebuilderTemplateName: string;
     public isTemplateJsonProvided: boolean = false;
     public templateJsonFromUser: string = '';
     public nowaitMode: string;
     public buildTimeoutInMinutes: number = 80;
     public vmSize: string = "";
-    public managedIdentity: string = "";
 
     // source
     public sourceImageType: string;
@@ -28,9 +28,8 @@ export default class TaskParameters {
     public imageSku: string = "";
 
     //customize
-    public buildPath: string;
-    public buildFolder: string;
-    public blobName: string = "";
+    public buildPath: string = "";
+    public buildFolder: string = "";
     public inlineScript: string;
     public provisioner: string = "";
     public windowsUpdateProvisioner: boolean;
@@ -59,8 +58,8 @@ export default class TaskParameters {
         if (!(locations.indexOf(this.location.toString().replace(/\s/g, "").toLowerCase()) > -1)) {
             throw new Error("location not from available regions or it is not defined");
         }
-        this.resourceGroupName = tl.getInput(constants.ResourceGroupName, {required: true});
-        this.managedIdentity = tl.getInput(constants.ManagedIdentity, {required: true});
+        this.resourceGroupName = tl.getInput(constants.ResourceGroupName, { required: true });
+        this.managedIdentity = tl.getInput(constants.ManagedIdentity, { required: true });
         this.imagebuilderTemplateName = tl.getInput(constants.ImageBuilderTemplateName);
         if (this.imagebuilderTemplateName.indexOf("json") > -1) {
             this.isTemplateJsonProvided = true;
@@ -68,13 +67,11 @@ export default class TaskParameters {
             this.templateJsonFromUser = JSON.parse(JSON.stringify(data));
             console.log(this.templateJsonFromUser);
         }
+
         this.nowaitMode = tl.getInput(constants.NoWaitMode);
         this.buildTimeoutInMinutes = parseInt(tl.getInput(constants.BuildTimeoutInMinutes));
         //vm size
         this.vmSize = tl.getInput(constants.VMSize);
-        if (this.vmSize == undefined || this.vmSize == "") {
-            this.vmSize = "Standard_D1_v2";
-        }
 
         //source inputs
         this.sourceImageType = tl.getInput(constants.SourceImageType);
@@ -94,18 +91,22 @@ export default class TaskParameters {
 
         //customize inputs
         this.customizerSource = tl.getInput(constants.CustomizerSource).toString();
-        if (this.customizerSource == undefined || this.customizerSource == "") {
+        if (this.customizerSource == undefined || this.customizerSource == '' || this.customizerSource == null) {
             var artifactsPath = path.join(`${process.env.GITHUB_WORKSPACE}`, "imageArtifacts");
             if (fs.existsSync(artifactsPath)) {
                 this.customizerSource = artifactsPath;
             }
         }
+        if (!(this.customizerSource == undefined || this.customizerSource == '' || this.customizerSource == null)) {
+            var bp = this.customizerSource;
+            var x = bp.split(path.sep);
+            this.buildFolder = x[x.length - 1].split(".")[0];
+            this.buildPath = path.normalize(bp.trim());
+        }
+        console.log("customizer source " + this.customizerSource);
+
         this.customizerScript = tl.getInput(constants.customizerScript).toString();
 
-        var bp = this.customizerSource;
-        var x = bp.split(path.sep);
-        this.buildFolder = x[x.length - 1];
-        this.buildPath = path.normalize(bp.trim());
         this.customizerDestination = tl.getInput(constants.customizerDestination);
         if (Utils.IsEqual(this.sourceOSType, "windows")) {
             this.provisioner = "powershell";
@@ -119,6 +120,7 @@ export default class TaskParameters {
                 this.customizerDestination = "/tmp/";
             }
         }
+        console.log("provisioner is " + this.provisioner + "  this.customizerDestination  " + this.customizerDestination);
         this.inlineScript = tl.getInput(constants.customizerScript);
         if (Utils.IsEqual(tl.getInput(constants.customizerWindowsUpdate), "true")) {
             this.windowsUpdateProvisioner = true;

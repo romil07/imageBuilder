@@ -92,7 +92,6 @@ export default class BuildTemplate {
         console.log("Template String: \n" + template);
 
         var templateJson = JSON.parse(template);
-        console.log("Parsed Template String: \n");
         templateJson.location = this._taskParameters.location;
         if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
             templateJson.properties.source.publisher = this._taskParameters.imagePublisher;
@@ -126,7 +125,7 @@ export default class BuildTemplate {
             console.log("Inside shell Provisioner");
             var packageName = path.join(this._taskParameters.customizerDestination, this._taskParameters.buildFolder);
             // create buildartifacts folder
-            var inline = `New-item -Path c:\\ -itemtype directory\n`
+            var inline = `New-item -Path ${this._taskParameters.customizerDestination} -itemtype directory\n`
             // download zip
             inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
             // unzip
@@ -134,8 +133,6 @@ export default class BuildTemplate {
             console.log("Inside shell Provisioner. Script = " + inline);
             if (this._taskParameters.inlineScript)
                 inline += `${this._taskParameters.inlineScript}\n`;
-            
-            console.log("Properties: \n" + JSON.stringify(templateJson.properties));
             templateJson.properties.customize[0].inline = inline.split("\n");
         }
 

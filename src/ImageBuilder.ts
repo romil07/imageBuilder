@@ -18,11 +18,7 @@ import { ServiceClient as AzureRestClient } from 'azure-actions-webclient/AzureR
 var azure = require('azure-storage');
 
 var azPath: string;
-var roleDefinitionExists: boolean = false;
-var managedIdentityExists: boolean = false;
-var roleAssignmentForManagedIdentityExists: boolean = false;
 var storageAccountExists: boolean = false;
-var roleAssignmentForStorageAccountExists: boolean = false;
 export default class ImageBuilder {
 
     private _taskParameters: TaskParameters;
@@ -31,13 +27,12 @@ export default class ImageBuilder {
     private _blobService: any;
     private _client: AzureRestClient;
 
+    private subscriptionId: string = "";
     private isVhdDistribute: boolean = false;
     private templateName: string = "";
     private storageAccount: string = "";
     private containerName: string = "";
-    private principalId = "";
     private idenityName: string = "";
-    private imageRoleDefName: string = "";
     private imgBuilderTemplateExists: boolean = false;
     private accountkeys: string = "";
 
@@ -57,95 +52,87 @@ export default class ImageBuilder {
     async execute() {
 
         try {
-
+            var outStream: any;
             azPath = await io.which("az", true);
             core.debug("Az module path: " + azPath);
-            // var outStream = '';
+
             await this.executeAzCliCommand("--version");
 
-            //this.registerFeatures();
+            await this.registerFeatures();
+
+            this.sleepFor(2);
 
             //GENERAL INPUTS
             outStream = await this.executeAzCliCommand("account show");
-            var subscriptionId = JSON.parse(`${outStream}`).id.toString();
+            this.subscriptionId = JSON.parse(`${outStream}`).id.toString();
 
             var isCreateBlob = false;
             var imgBuilderId = "";
-            
+
+            console.log("template json provided " + this._taskParameters.isTemplateJsonProvided);
             if (!this._taskParameters.isTemplateJsonProvided) {
-                isCreateBlob = true;
-                // handle resource group
-                if (this._taskParameters.resourceGroupName == null || this._taskParameters.resourceGroupName == undefined || this._taskParameters.resourceGroupName.length == 0) {
-                    var resourceGroupName = Util.format('%s%s', constants.resourceGroupName, getCurrentTime());
-                    this._taskParameters.resourceGroupName = resourceGroupName;
-                    await this.executeAzCliCommand(`group create -n ${resourceGroupName} -l ${this._taskParameters.location}`);
-                }
-
-                console.log("identity-name = " + this.idenityName);
-                imgBuilderId = `/subscriptions/${subscriptionId}/resourcegroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${this.idenityName}`;
-                this.principalId = JSON.parse(await this.executeAzCliCommand(`identity show --resource-group ${this._taskParameters.resourceGroupName} --name ${this.idenityName}`)).principalId;
-
-                await this.createStorageAccount();
-
-            } else {
-                var template = JSON.parse(this._taskParameters.templateJsonFromUser);
-                if (this._taskParameters.customizerSource) {
-                    isCreateBlob = true;
-                    var identities = template.identity.userAssignedIdentities
-
-                    var keys = Object.keys(identities);
-                    if (keys && keys.length >= 1) {
-                        this.idenityName = keys[0];
-                    }
-                    var name = this.idenityName.split(path.sep);
-                    this.idenityName = name[name.length - 1];
-                    console.log("identity-name = " + this.idenityName);
-
-                    this.principalId = JSON.parse(await this.executeAzCliCommand(`identity show --resource-group ${this._taskParameters.resourceGroupName} --name ${this.idenityName}`)).principalId;
-                    console.log("Principal id = " + this.principalId);
-                    await this.createStorageAccount();
+                outStream = JSON.parse(await this.executeAzCliCommand(`identity show --resource-group ${this._taskParameters.resourceGroupName} --name ${this.idenityName}`));
+                if (outStream != undefined) {
+                    imgBuilderId = outStream.id;
                 }
             }
 
+            if (this._taskParameters.customizerSource != undefined && this._taskParameters.customizerSource != '' && this._taskParameters.customizerSource != null && this._taskParameters.customizerSource.length >= 1) {
+                isCreateBlob = true;
+            }
             var blobUrl = "";
+            
             if (isCreateBlob) {
+                await this.createStorageAccount();
+
+                this.sleepFor(2);
+
                 //create a blob service
                 this._blobService = azure.createBlobService(this.storageAccount, this.accountkeys);
                 this.containerName = constants.containerName;
-                var blobName : string = this._taskParameters.buildFolder + "/" + process.env.GITHUB_RUN_ID + "/" + this._taskParameters.buildFolder + `_${getCurrentTime()}`;
+                var blobName: string = this._taskParameters.buildFolder + "/" + process.env.GITHUB_RUN_ID + "/" + this._taskParameters.buildFolder + `_${getCurrentTime()}`;
                 if (Utils.IsEqual(this._taskParameters.provisioner, "powershell"))
                     blobName = blobName + '.zip';
                 else
                     blobName = blobName + '.tar.gz';
 
-                blobUrl = await this.uploadPackage(this.containerName, blobName);
+                blobUrl = await this.uploadPackage(blobName);
                 core.debug("Blob Url: " + blobUrl);
             }
 
             let templateJson: any = "";
             if (!this._taskParameters.isTemplateJsonProvided) {
-                templateJson = await this._buildTemplate.getTemplate(blobUrl, imgBuilderId, subscriptionId);
-                console.log("Template Json = \n" + templateJson);
+                //create template
+                core.debug("Creating image template");
+                templateJson = await this._buildTemplate.getTemplate(blobUrl, imgBuilderId, this.subscriptionId);
             } else {
                 templateJson = this._buildTemplate.addUserCustomisationIfNeeded(blobUrl);
             }
 
             this.templateName = this.getTemplateName();
+            console.log("Template Name = " + this.templateName);
             var runOutputName = this._taskParameters.runOutputName;
-            if (runOutputName == null || runOutputName == undefined || runOutputName.length == 0) {
+            if ((runOutputName == null || runOutputName == undefined || runOutputName.length == 0) && (templateJson.properties.distribute[0].runOutputName != null &&
+                templateJson.properties.distribute[0].runOutputName != undefined && templateJson.properties.distribute[0].runOutputName.length >= 1)) {
+                runOutputName = templateJson.properties.distribute[0].runOutputName;
+            }
+            else if (runOutputName == null || runOutputName == undefined || runOutputName.length == 0) {
                 runOutputName = this.templateName + "_" + process.env.GITHUB_RUN_ID;
                 templateJson.properties.distribute[0].runOutputName = runOutputName;
             }
             this.isVhdDistribute = templateJson.properties.distribute[0].type == "VHD";
 
             var templateStr = JSON.stringify(templateJson);
-            console.log("Template json: \n" + templateStr);
-            await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
-            this.imgBuilderTemplateExists = true;
+            console.log("Image Template JSON: \n" + templateStr);
+            this.sleepFor(1);
+            await this._aibClient.putImageTemplate(templateStr, this.templateName, this.subscriptionId);
+            //we should delete it after run or put template??????????????
+            //this.imgBuilderTemplateExists = true;
 
-            await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
-            var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
-            var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
+            await this._aibClient.runTemplate(this.templateName, this.subscriptionId, this._taskParameters.buildTimeoutInMinutes);
+            this.imgBuilderTemplateExists = true;
+            var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, this.subscriptionId);
+            var templateID = await this._aibClient.getTemplateId(this.templateName, this.subscriptionId);
             core.setOutput('templateName', this.templateName);
             core.setOutput('templateId', templateID);
             if (out) {
@@ -174,11 +161,53 @@ export default class ImageBuilder {
             throw error;
         }
         finally {
-            var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
+            outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
-                //this.cleanup(this.isVhdDistribute, this.templateName, this.imgBuilderTemplateExists, subscriptionId, this.storageAccount, this.containerName, this.accountkeys, this.idenityName, this.principalId, this.imageRoleDefName);
+                this.cleanup();
             }
         }
+    }
+
+    private addUserCustomisationIfNeeded(blobUrl: string) {
+        var json = JSON.parse(this._taskParameters.templateJsonFromUser);
+        var customizers = json.properties.customize;
+        var shellCustomizer;
+        // add customization for custom scripts
+        if (!!this._taskParameters.customizerScript) {
+            if (Utils.IsEqual(this._taskParameters.sourceOSType, "Windows")) {
+                shellCustomizer = {
+                    "type": "PowerShell",
+                    "name": "CustomPowershell" + getCurrentTime(),
+                    "inline": [
+                        this._taskParameters.customizerScript
+                    ]
+                }
+            } else {
+                shellCustomizer = {
+                    "type": "Shell",
+                    "name": "CustomShell" + getCurrentTime(),
+                    "inline": [
+                        this._taskParameters.customizerScript
+                    ]
+                }
+            }
+        }
+
+        // add customization for custom source
+        var fileCustomizer;
+        if (!!this._taskParameters.customizerSource) {
+            fileCustomizer = {
+                "type": "File",
+                "name": "CustomSource" + getCurrentTime(),
+                "sourceUri": blobUrl,
+                "destination": this._taskParameters.customizerDestination
+            }
+        }
+
+        if (fileCustomizer != null && fileCustomizer !== undefined) customizers.unshift(fileCustomizer);
+        if (shellCustomizer != null && shellCustomizer !== undefined) customizers.unshift(shellCustomizer);
+        json.properties.customize = customizers;
+        return json;
     }
 
     private async createStorageAccount() {
@@ -252,7 +281,7 @@ export default class ImageBuilder {
 
     private getTemplateName() {
         if (this._taskParameters.isTemplateJsonProvided) {
-            var name = this.getTemplateNameFromProvidedJson(this._taskParameters.templateJsonFromUser);
+            var name = this.getTemplateNameFromProvidedJson();
             return name == "" ? constants.imageTemplateName + getCurrentTime() : name;
         } else if (!this._taskParameters.isTemplateJsonProvided && this._taskParameters.imagebuilderTemplateName) {
             return this._taskParameters.imagebuilderTemplateName;
@@ -260,8 +289,8 @@ export default class ImageBuilder {
         return constants.imageTemplateName + getCurrentTime();
     }
 
-    private getTemplateNameFromProvidedJson(templateJson: string): string {
-        var template = JSON.parse(templateJson);
+    private getTemplateNameFromProvidedJson(): string {
+        var template = JSON.parse(this._taskParameters.templateJsonFromUser);
         if (template.tags && template.tags.imagebuilderTemplate) {
             return template.tags.imagebuilderTemplate;
         }
@@ -269,8 +298,7 @@ export default class ImageBuilder {
         return "";
     }
 
-    private async uploadPackage(containerName: string, blobName: string): Promise<string> {
-
+    private async uploadPackage(blobName: string): Promise<string> {
         var defer = Q.defer<string>();
         var archivedWebPackage: any;
         var temp = this._generateTemporaryFile(`${process.env.GITHUB_WORKSPACE}`);
@@ -287,17 +315,17 @@ export default class ImageBuilder {
         catch (error) {
             defer.reject(console.log(`unable to create archive build: ${error}`));
         }
-        console.log(`created archive ` + archivedWebPackage);
+        console.log(`created  archive ` + archivedWebPackage);
 
-        this._blobService.createContainerIfNotExists(containerName, (error: any) => {
+        this._blobService.createContainerIfNotExists(this.containerName, (error: any) => {
             if (error) {
-                defer.reject(console.log(`unable to create container ${containerName} in storage account: ${error}`));
+                defer.reject(console.log(`unable to create container ${this.containerName} in storage account: ${error}`));
             }
 
             //upoading package
-            this._blobService.createBlockBlobFromLocalFile(containerName, blobName, archivedWebPackage, (error: any, result: any) => {
+            this._blobService.createBlockBlobFromLocalFile(this.containerName, blobName, archivedWebPackage, (error: any, result: any) => {
                 if (error) {
-                    defer.reject(console.log(`unable to create blob ${blobName} in container ${containerName} in storage account: ${error}`));
+                    defer.reject(console.log(`unable to create blob ${blobName} in container ${this.containerName} in storage account: ${error}`));
                 }
                 //generating SAS URL
                 var startDate = new Date();
@@ -313,17 +341,17 @@ export default class ImageBuilder {
                     }
                 };
 
-                var token = this._blobService.generateSharedAccessSignature(containerName, blobName, sharedAccessPolicy);
-                var blobUrl = this._blobService.getUrl(containerName, blobName, token);
+                var token = this._blobService.generateSharedAccessSignature(this.containerName, blobName, sharedAccessPolicy);
+                var blobUrl = this._blobService.getUrl(this.containerName, blobName, token);
                 defer.resolve(blobUrl);
             });
         });
         return defer.promise;
     }
 
-    public async createArchiveTar(folderPath: string, targetPath: string, extension: string) {
+    public async createArchiveTar(sourcePath: string, targetPath: string, extension: string) {
         var defer = Q.defer();
-        console.log('Archiving ' + folderPath + ' to ' + targetPath);
+        console.log('Archiving ' + sourcePath + ' to ' + targetPath);
         var output = fs.createWriteStream(targetPath);
         var archive: any;
 
@@ -349,10 +377,16 @@ export default class ImageBuilder {
             defer.reject(error);
         });
 
-        archive.glob("**", {
-            cwd: folderPath,
-            dot: true
-        });
+        var stats = fs.statSync(sourcePath);
+        if (stats.isFile()) {
+            archive.file(sourcePath, { name: this._taskParameters.buildFolder });
+        }
+        else {
+            archive.glob("**", {
+                cwd: sourcePath,
+                dot: true
+            });
+        }
         archive.pipe(output);
         archive.finalize();
 
@@ -365,35 +399,19 @@ export default class ImageBuilder {
         return tempPath;
     }
 
-    private async cleanup(isVhdDistribute: boolean, templateName: string, imgBuilderTemplateExists: boolean, subscriptionId: string, storageAccount: string, containerName: string, accountkeys: string, idenityName: string, principalId: string, imageRoleDefName: string) {
+    private async cleanup() {
         try {
-            if (!isVhdDistribute && imgBuilderTemplateExists) {
-                await this._aibClient.deleteTemplate(templateName, subscriptionId);
-                console.log(`${templateName} got deleted`);
-            }
-            if (roleAssignmentForStorageAccountExists) {
-                await this.executeAzCliCommand(`role assignment delete --assignee ${principalId} --role "Storage Blob Data Reader" --scope /subscriptions/${subscriptionId}/resourceGroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount}/blobServices/default/containers/${containerName}`);
-                console.log("role assignment for storage account deleted");
+            if (!this.isVhdDistribute && this.imgBuilderTemplateExists) {
+                await this._aibClient.deleteTemplate(this.templateName, this.subscriptionId);
+                console.log(`${this.templateName} got deleted`);
             }
             if (storageAccountExists) {
                 let httpRequest: WebRequest = {
                     method: 'DELETE',
-                    uri: this._client.getRequestUri(`subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{storageAccount}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{storageAccount}': storageAccount }, [], "2019-06-01")
+                    uri: this._client.getRequestUri(`subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{storageAccount}`, { '{subscriptionId}': this.subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{storageAccount}': this.storageAccount }, [], "2019-06-01")
                 };
                 var response = await this._client.beginRequest(httpRequest);
-                console.log("storage account " + storageAccount + " deleted");
-            }
-            if (roleAssignmentForManagedIdentityExists) {
-                await this.executeAzCliCommand(`role assignment delete --assignee ${principalId} --role ${imageRoleDefName} --scope /subscriptions/${subscriptionId}/resourceGroups/${this._taskParameters.resourceGroupName}`);
-                console.log("role assignment deleted");
-            }
-            if (managedIdentityExists) {
-                await this.executeAzCliCommand(`identity delete -n ${idenityName} -g ${this._taskParameters.resourceGroupName}`);
-                console.log(`identity ${idenityName} deleted`);
-            }
-            if (roleDefinitionExists) {
-                await this.executeAzCliCommand(`role definition delete --name ${imageRoleDefName}`);
-                console.log(`role definition ${imageRoleDefName} deleted`);
+                console.log("storage account " + this.storageAccount + " deleted");
             }
         }
         catch (error) {
@@ -403,7 +421,7 @@ export default class ImageBuilder {
 
     async executeAzCliCommand(command: string): Promise<string> {
         var outStream: string = '';
-        console.log("az cli command " + command);
+        console.log("command " + command);
         var execOptions: any = {
             outStream: new NullOutstreamStringWritable({ decodeStrings: false }),
             listeners: {
@@ -415,9 +433,6 @@ export default class ImageBuilder {
             return outStream;
         }
         catch (error) {
-            console.log("cli command failed with following output: \n" + outStream);
-            core.error("cli command failed with following output: \n" + outStream);
-            core.setFailed("Action run failed");
             throw error;
         }
     }

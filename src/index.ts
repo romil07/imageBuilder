@@ -11,6 +11,6 @@ async function main(): Promise<void> {
 main().then()
     .catch((error) => {
         core.setOutput('imagebuilderRunStatus', "failed");
-        core.setFailed(error);
+        core.error(error);
+        core.setFailed("Action run failed");
     });
-

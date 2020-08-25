@@ -1,46 +1,80 @@
+# This is a basic workflow to help you get started with Actions
+name: CI
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches: [ imagebuilder ]
+  pull_request:
+    branches: [ ]
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # This workflow contains a single job called "build"
+      
   job1:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    
     name: A job to use action to run aib action
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+    
+     # To use this repository's private action,
+      # you must check out the repository
     - name: Checkout
       uses: actions/checkout@v2
-
+    - shell: bash
+      run: mkdir -p homework
+    - shell: bash
+      run: |
+        echo Hello World! > homework/hello-world.txt |
+        echo Hello World! > homework/hello-world2.txt
+    #- name: Upload hello world file
+     # uses: actions/upload-artifact@v1
+      #with:
+       # name: hello-world
+        #path: homework
+    #- name: Download hello world file
+     # uses: actions/download-artifact@v1
+      #with:
+       # name: hello-world
+        #path: homework
+    
     - name: Login via Az module
       uses: azure/login@v1.1
       with:
-        creds: ${{secrets.AZURE_CREDS}}
-
-    - shell: bash
-      run: |
-        mkdir -p homework
-        echo 'hello world' > homework/helloworld1.txt
-        pwd
-        ls -a
-        ls homework
-        echo $GITHUB_WORKSPACE
-
-
-    - name: Azure Image Builder Action
+        creds: ${{secrets.AZURE_CREDENTIALS}}      
+    
+    # uses action for AIB to create image
+    - name: aib action
       id: aib
       uses: ./
       with:
-        location: 'eastus'
-        resource-group-name: 'rogoyaltest'
-        managed-identity: 'rogoyal-identity'
-        image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
-        source-os-type: 'windows'
-        source-image-type: 'marketplace'
-        source-image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest'
-        customizer-source: '${{ github.workspace }}/homework'
-        customizer-script: 'mkdir C:\\rogoyaltest'
-        distributor-type: 'sharedgalleryimage'
-        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn'
+        location: 'westtus'
+        #resource-group-name: 'rg_aib_action_1597077618408'
+        #resource-group-name: 'aibResourceGroupSIG'
+        managed-identity: 'aibIdentitySIGLin'
+        resource-group-name: 'aibResourceGroupLin'
+        #resource-group-name: 'rg_aib_action_1597591645408'
+        #imagebuilder-template-name: 'imagetemplatesiglinux'
+        #imagebuilder-template-name: '/home/runner/work/AIB_Action/AIB_Action/src/sourceTemplate.json'
+        source-os-type: 'linux'
+        source-image-type: 'platformimage'
+        #source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
+        source-image: Canonical:UbuntuServer:18.04-DAILY-LTS:latest
+        #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupMGLin/providers/Microsoft.Compute/images/aibManagedImage'
+        #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin/versions/0.24374.10929'
+        #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn/versions/0.24373.21584'
+        customizer-source: '/home/runner/work/AIB_Action/AIB_Action/homework/hello-world.txt'
+        #customizer-destination: 'c:\\buildartifacts\\'
+        distributor-type: 'SharedGalleryImage'
+        #buildTimeoutInMinutes: '1'
+        #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'
+        dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin'
+        #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn'
+        #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupMG/providers/Microsoft.Compute/images/aibManagedImage'
+        #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupMGLin/providers/Microsoft.Compute/images/aibManagedImage'
         dist-location: 'eastus'
-
     - name: print aib output
       run: echo output from aib ${{ steps.aib.outputs.imagebuilderRunStatus }} ${{ steps.aib.outputs.runOutputName }} ${{ steps.aib.outputs.customImageURI }}
