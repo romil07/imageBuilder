@@ -70,7 +70,7 @@ jobs:
         customizer-source: '${{ github.workspace }}/homework'
         #customizer-destination: 'c:\\buildartifacts\\'
         #customizer-destination: '/buildArtifacts/'
-        customizer-destination: '/home/anugupt14/'
+        customizer-destination: '/buildArtifacts/'
         distributor-type: 'SharedGalleryImage'
         #buildTimeoutInMinutes: '1'
         #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'
