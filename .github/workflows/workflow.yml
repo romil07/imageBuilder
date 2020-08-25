@@ -32,14 +32,15 @@ jobs:
         location: 'eastus'
         resource-group-name: 'rogoyaltest'
         managed-identity: 'rogoyal-identity'
-        image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
+        # image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
         source-os-type: 'windows'
         source-image-type: 'marketplace'
         source-image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest'
         customizer-source: '${{ github.workspace }}/homework'
+        customizer-destiantion: 'C:\\rogoyal\dest'
         customizer-script: 'mkdir C:\\rogoyaltest'
-        distributor-type: 'sharedgalleryimage'
-        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn'
+        distributor-type: 'ManagedImage'
+        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/images/win-market-managed-system'
         dist-location: 'eastus'
 
     - name: print aib output
