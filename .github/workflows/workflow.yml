@@ -30,7 +30,7 @@ jobs:
       uses: ./
       with:
         location: 'eastus'
-        resource-group-name: 'rogoyaltest'
+        resource-group-name: 'rogoyaltabc'
         managed-identity: 'rogoyal-identity'
         # image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
         source-os-type: 'windows'
