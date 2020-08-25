@@ -2,14 +2,13 @@
     "type": "Microsoft.VirtualMachineImages/imageTemplates",
     "location": "eastus",
     "tags": {
-        "imagebuilderTemplate": "AzureImageBuilderSIG4",
-        "userIdentity": "enabled",
-        "user": "rogoyal"
+        "imagebuilderTemplate": "AzureImageBuilderSIG-userProvidedTemplateNew2",
+        "userIdentity": "enabled"
     },
     "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-            "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.ManagedIdentity/userAssignedIdentities/rogoyal-managedIdentity": {}
+            "/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aibIdentitySIGLin": {}
         }
     },
     "properties": {
@@ -62,7 +61,7 @@
         "distribute": [
             {
                 "type": "SharedImage",
-                "galleryImageId": "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/rogoyalsiglinux/images/rogoyallinuxdefnnew",
+                "galleryImageId": "/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefnlin",
                 "runOutputName": "",
                 "artifactTags": {
                     "source": "azureVmImageBuilder",

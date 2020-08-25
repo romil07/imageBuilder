@@ -1,10 +1,14 @@
 {
     "type": "Microsoft.VirtualMachineImages/imageTemplates",
-    "location": "eastus",
+    "location": "westus",
+    "tags": {
+        "imagebuilderTemplate": "AzureImageBuilderSIG-userProvidedTemplateNew2",
+        "userIdentity": "enabled"
+    },
     "identity": {
         "type": "UserAssigned",
         "userAssignedIdentities": {
-            "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/rogoyal-identity": {}
+            "/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aibIdentitySIGLin": {}
         }
     },
     "properties": {
@@ -58,14 +62,14 @@
         "distribute": [
             {
                 "type": "SharedImage",
-                "galleryImageId": "/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn",
+                "galleryImageId": "/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefnlin",
                 "runOutputName": "userProvidedTemplateWindowsRun",
                 "artifactTags": {
                     "source": "azureVmImageBuilder",
                     "baseosimg": "windows2019"
                 },
                 "replicationRegions": [
-                    "eastus"
+                    "westus"
                 ]
             }
         ]
