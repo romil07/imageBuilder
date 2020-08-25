@@ -414,7 +414,6 @@ export default class ImageBuilder {
             return outStream;
         }
         catch (error) {
-            core.error("cli command failed with following output: \n" + error.toString());
             core.setFailed("Action run failed");
             throw error;
         }
