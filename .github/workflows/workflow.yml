@@ -29,8 +29,8 @@ jobs:
       id: aib
       uses: ./
       with:
-        location: 'japaneast'
-        resource-group-name: 'rogoyaltest'
+        location: 'eastus'
+        resource-group-name: 'rogoyaltabc'
         managed-identity: 'rogoyal-identity'
         # image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
         source-os-type: 'windows'

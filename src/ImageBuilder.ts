@@ -405,7 +405,6 @@ export default class ImageBuilder {
         var outStream: string = '';
         console.log("az cli command " + command);
         var execOptions: any = {
-            outStream: new NullOutstreamStringWritable({ decodeStrings: false }),
             listeners: {
                 stdout: (data: any) => outStream += data.toString(),
             }
