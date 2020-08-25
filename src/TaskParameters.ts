@@ -33,8 +33,6 @@ export default class TaskParameters {
     public inlineScript: string;
     public provisioner: string = "";
     public windowsUpdateProvisioner: boolean;
-    //??
-    public storageAccountName: string = "";
 
     public customizerSource: string = "";
     public customizerDestination: string = "";

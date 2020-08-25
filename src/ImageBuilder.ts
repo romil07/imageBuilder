@@ -168,48 +168,6 @@ export default class ImageBuilder {
         }
     }
 
-    private addUserCustomisationIfNeeded(blobUrl: string) {
-        var json = JSON.parse(this._taskParameters.templateJsonFromUser);
-        var customizers = json.properties.customize;
-        var shellCustomizer;
-        // add customization for custom scripts
-        if (!!this._taskParameters.customizerScript) {
-            if (Utils.IsEqual(this._taskParameters.sourceOSType, "Windows")) {
-                shellCustomizer = {
-                    "type": "PowerShell",
-                    "name": "CustomPowershell" + getCurrentTime(),
-                    "inline": [
-                        this._taskParameters.customizerScript
-                    ]
-                }
-            } else {
-                shellCustomizer = {
-                    "type": "Shell",
-                    "name": "CustomShell" + getCurrentTime(),
-                    "inline": [
-                        this._taskParameters.customizerScript
-                    ]
-                }
-            }
-        }
-
-        // add customization for custom source
-        var fileCustomizer;
-        if (!!this._taskParameters.customizerSource) {
-            fileCustomizer = {
-                "type": "File",
-                "name": "CustomSource" + getCurrentTime(),
-                "sourceUri": blobUrl,
-                "destination": this._taskParameters.customizerDestination
-            }
-        }
-
-        if (fileCustomizer != null && fileCustomizer !== undefined) customizers.unshift(fileCustomizer);
-        if (shellCustomizer != null && shellCustomizer !== undefined) customizers.unshift(shellCustomizer);
-        json.properties.customize = customizers;
-        return json;
-    }
-
     private async createStorageAccount() {
         this.storageAccount = Util.format('%s%s', constants.storageAccountName, getCurrentTime());
         await this.executeAzCliCommand(`storage account create --name "${this.storageAccount}" --resource-group "${this._taskParameters.resourceGroupName}" --location "${this._taskParameters.location}" --sku Standard_RAGRS`);

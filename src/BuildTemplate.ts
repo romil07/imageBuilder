@@ -89,8 +89,6 @@ export default class BuildTemplate {
             customizers = customizers + "," + templateCustomizer.get("windowsUpdate");
         template = template.replace("CUSTOMIZE", <string>customizers);
 
-        console.log("Template String: \n" + template);
-
         var templateJson = JSON.parse(template);
         templateJson.location = this._taskParameters.location;
         if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {

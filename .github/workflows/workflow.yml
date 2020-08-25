@@ -60,15 +60,16 @@ jobs:
         #imagebuilder-template-name: 'imagetemplatesiglinux'
         #imagebuilder-template-name: '/home/runner/work/AIB_Action/AIB_Action/src/sourceTemplate.json'
         source-os-type: 'linux'
-        source-image-type: 'platformimage'
+        source-image-type: 'SharedGalleryImage'
         #source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
-        source-image: Canonical:UbuntuServer:18.04-DAILY-LTS:latest
+        #source-image: Canonical:UbuntuServer:18.04-DAILY-LTS:latest
         #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupMGLin/providers/Microsoft.Compute/images/aibManagedImage'
-        #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin/versions/0.24374.10929'
+        source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin/versions/0.24374.10929'
         #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn/versions/0.24373.21584'
         #customizer-source: '/home/runner/work/AIB_Action/AIB_Action/homework/hello-world.txt'
         customizer-source: '${{ github.workspace }}/homework'
         #customizer-destination: 'c:\\buildartifacts\\'
+        customizer-destination: '/home/anugupt14/'
         distributor-type: 'SharedGalleryImage'
         #buildTimeoutInMinutes: '1'
         #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'
