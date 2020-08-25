@@ -40,8 +40,8 @@ jobs:
         source-image: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn/versions/0.24388.44616'
         customizer-source: '${{ github.workspace }}/homework'
         # customizer-destination: 'C:\\rogoyal\dest'
-        customizer-script: 'mkdir C:\\rogoyaltest'
-        distributor-type: 'sharedgalleryimage'
+        customizer-script: 'mkdir C:\\rogoyaltest2'
+        distributor-type: 'VHD'
         dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn'
         dist-location: 'eastus'
 
