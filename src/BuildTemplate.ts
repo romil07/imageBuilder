@@ -111,6 +111,7 @@ export default class BuildTemplate {
             var inline: string = "#\n";
             console.log("Inside shell Provisioner");
             var packageName = path.join(this._taskParameters.customizerDestination, this._taskParameters.buildFolder);
+            console.log("packages name " + packageName);
             templateJson.properties.customize[0].sourceUri = blobUrl;
             templateJson.properties.customize[0].destination = `${packageName}.tar.gz`;
             inline += `mkdir -p ${packageName}\n`
@@ -157,7 +158,7 @@ export default class BuildTemplate {
         if (!!this._taskParameters.customizerSource) {
             fileCustomizer = JSON.parse("[" + <string>templateCustomizer.get(this._taskParameters.provisioner) + "]");
             console.log("File Customzers: \n" + JSON.stringify(fileCustomizer));
-            for (var i = fileCustomizer.length - 1; i >=0; i--) {
+            for (var i = fileCustomizer.length - 1; i >= 0; i--) {
                 customizers.unshift(fileCustomizer[i]);
             }
             
@@ -167,6 +168,7 @@ export default class BuildTemplate {
                 console.log("Inside shell customization");
                 var inline: string = "#\n";
                 var packageName = path.join(this._taskParameters.customizerDestination, this._taskParameters.buildFolder);
+                console.log("package name " + packageName)
                 console.log("First customizer: \n" + JSON.stringify(json.properties.customize[0]));
                 json.properties.customize[0].sourceUri = blobUrl;
                 json.properties.customize[0].destination = `${packageName}.tar.gz`;
@@ -179,7 +181,7 @@ export default class BuildTemplate {
             } else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
                 var packageName = path.join(this._taskParameters.customizerDestination, this._taskParameters.buildFolder);
                 // create buildartifacts folder
-                var inline = `New-item -Path c:\\ -itemtype directory\n`
+                var inline = `New-item -Path ${packageName} -itemtype directory\n`
                 // download zip
                 inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
                 // unzip
@@ -189,7 +191,7 @@ export default class BuildTemplate {
                 json.properties.customize[0].inline = inline.split("\n");
             }
         }
-        
+
         json.properties.customize = customizers;
         return json;
     }
