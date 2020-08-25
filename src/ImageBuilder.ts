@@ -414,9 +414,7 @@ export default class ImageBuilder {
             return outStream;
         }
         catch (error) {
-            console.log("cli command failed with following output: \n" + outStream);
-            core.error(error);
-            core.error("cli command failed with following output: \n" + outStream);
+            core.error("cli command failed with following output: \n" + error);
             core.setFailed("Action run failed");
             throw error;
         }
