@@ -127,7 +127,7 @@ export default class BuildTemplate {
         else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
             console.log("Inside shell Provisioner");
             var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
-            // create buildartifacts folder
+            // create workflow-artifacts  folder
             var inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
             // download zip
             inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
@@ -185,7 +185,7 @@ export default class BuildTemplate {
                 console.log("Final customizer: \n" + JSON.stringify(json.properties.customize[0]));
             } else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
                 var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
-                // create buildartifacts folder
+                // create workflow-artifacts folder
                 var inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
                 // download zip
                 inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
