@@ -57,7 +57,7 @@ jobs:
         managed-identity: 'aibIdentitySIGLin'
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
-        image-builder-template-name: 'imagetemplatelinsigF1'
+        image-builder-template-name: 'imagetemplatelinvhdF3'
         #image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
         source-os-type: 'linux'
         source-image-type: 'marketplace'
@@ -69,11 +69,11 @@ jobs:
         customizer-source: '${{ GITHUB.WORKSPACE }}/homework'
         customizer-script: |
           sudo mkdir /buildArtifacts
-          sudo cp -r /tmp/homework /buildArtifacts/homework
-        distributor-type: 'SharedGalleryImage'
+          sudo cp -r /tmp/homework/ /buildArtifacts/
+        distributor-type: 'VHD'
         #buildTimeoutInMinutes: '1'
         #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'
-        dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin'
+        #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin'
         #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn'
         #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/images/aibManagedImageLin'
         #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupMGLin/providers/Microsoft.Compute/images/aibManagedImage'
