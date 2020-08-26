@@ -28,8 +28,8 @@ jobs:
       run: mkdir -p homework
     - shell: bash
       run: |
-        echo Hello World! > homework/hello-world.txt |
-        echo Hello World! > homework/hello-world2.txt
+        echo Hellooooooooooo Hiiiiiiiiiiiii! > homework/hello-world.txt |
+        echo Hiiiiiiiiiiiii! Hellooooooooooo > homework/hello-world2.txt
     #- name: Upload hello world file
      # uses: actions/upload-artifact@v1
       #with:
@@ -58,7 +58,7 @@ jobs:
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
         #image-builder-template-name: 'imagetmpmgsig'
-        image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/vhdTemplate.json'
+        image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
         source-os-type: 'linux'
         source-image-type: 'ManagedImage'
         #source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
@@ -68,8 +68,8 @@ jobs:
         #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn/versions/0.24373.21584'
         customizer-source: '${{ GITHUB.WORKSPACE }}/homework/hello-world.txt'
         customizer-script: |
-          sudo mkdir /workflowartvhd
-          sudo cp -r /tmp/hello-world/ /workflowartvhd/hello-world
+          sudo mkdir /workflowartsig
+          sudo cp -r /tmp/hello-world/ /workflowartsig/hello-world
         distributor-type: 'SharedGalleryImage'
         #buildTimeoutInMinutes: '1'
         #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'
