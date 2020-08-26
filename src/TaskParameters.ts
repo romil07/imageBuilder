@@ -96,11 +96,14 @@ export default class TaskParameters {
         if (!(this.customizerSource == undefined || this.customizerSource == '' || this.customizerSource == null)) {
             var bp = this.customizerSource;
             var x = bp.split(path.sep);
+            if (x[x.length - 1] == "") {
+                x[x.length - 1] = x[x.length - 2];
+            }
             //this.buildFolder = x[x.length - 1].split(".")[0];
             this.buildFolder = x[x.length - 1];
             this.buildPath = path.normalize(bp.trim());
         }
-        console.log("customizer source " + this.customizerSource);
+        console.log("customizer source " + this.customizerSource + " and build folder is " + this.buildFolder);
 
         this.customizerScript = tl.getInput(constants.customizerScript).toString();
 
