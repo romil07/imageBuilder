@@ -57,8 +57,8 @@ jobs:
         managed-identity: 'aibIdentitySIGLin'
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
-        image-builder-template-name: 'imagetemplatemgsigff'
-        #image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
+        #image-builder-template-name: 'imagetemplatemgsigff'
+        image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
         source-os-type: 'linux'
         source-image-type: 'ManagedImage'
         #source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
