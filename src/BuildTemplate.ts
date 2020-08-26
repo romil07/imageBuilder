@@ -84,7 +84,9 @@ export default class BuildTemplate {
         template = template.replace("VM_SIZE", this._taskParameters.vmSize);
         template = template.replace("SOURCE", <string>templateSource.get(this._taskParameters.sourceImageType.toLowerCase()));
         template = template.replace("DISTRIBUTE", <string>templateDistribute.get(this._taskParameters.distributeType.toLowerCase()));
+        console.log("Provisioner: " + this._taskParameters.provisioner);
         var customizers = templateCustomizer.get(this._taskParameters.provisioner);
+        console.log("Customizers: " + JSON.stringify(customizers));
         if (Utils.IsEqual(this._taskParameters.provisioner, "powershell") && this._taskParameters.windowsUpdateProvisioner)
             customizers = customizers + "," + templateCustomizer.get("windowsUpdate");
         template = template.replace("CUSTOMIZE", <string>customizers);
