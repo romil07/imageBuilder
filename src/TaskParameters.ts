@@ -38,7 +38,7 @@ export default class TaskParameters {
     public storageAccountName: string = "";
 
     public customizerSource: string = "";
-    public customizerDestination: string = "";
+    //public customizerDestination: string = "";
     public customizerScript: string = "";
     public customizerWindowsUpdate: string = "";
 
@@ -106,19 +106,6 @@ export default class TaskParameters {
         var x = bp.split(path.sep);
         this.buildFolder = x[x.length - 1];
         this.buildPath = path.normalize(bp.trim());
-        this.customizerDestination = tl.getInput(constants.customizerDestination);
-        if (Utils.IsEqual(this.sourceOSType, "windows")) {
-            this.provisioner = "powershell";
-            if (this.customizerDestination == undefined || this.customizerDestination == null || this.customizerDestination == "") {
-                this.customizerDestination = "c:\\";
-            }
-        }
-        else {
-            this.provisioner = "shell";
-            if (this.customizerDestination == undefined || this.customizerDestination == null || this.customizerDestination == "") {
-                this.customizerDestination = "/tmp/";
-            }
-        }
         this.inlineScript = tl.getInput(constants.customizerScript);
         if (Utils.IsEqual(tl.getInput(constants.customizerWindowsUpdate), "true")) {
             this.windowsUpdateProvisioner = true;

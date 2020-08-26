@@ -36,8 +36,6 @@ inputs:
    #customization inouts
    customizer-source:
       description: 'This takes the path to a directory or a file in the runner. By default, it points to the default download directory of the github runner.'
-   customizer-destination:
-      description: 'The default path of customizer-destination would depend on the OS defined in source-os-type field.'
    customizer-script:
       description: 'The customer can enter multi inline powershell or shell commands and use variables to point to directories inside the downloaded location.'
    customizer-windows-update:
