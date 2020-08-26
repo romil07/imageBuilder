@@ -30,19 +30,22 @@ jobs:
       uses: ./
       with:
         location: 'eastus'
-        resource-group-name: 'rogoyaltabc'
-        managed-identity: 'rogoyal-identity'
+        resource-group-name: 'rogoyal'
+        managed-identity: 'rogoyal-managedIdentity'
         # image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
-        source-os-type: 'windows'
+        source-os-type: 'linux'
         source-image-type: 'marketplace'
-        source-image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest'
+        source-image: Canonical:UbuntuServer:18.04-DAILY-LTS:latest
+        # source-image: 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest'
         # source-image: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/images/win-market-managed-system'
         # source-image: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn/versions/0.24388.44616'
         customizer-source: '${{ github.workspace }}/homework'
-        customizer-destination: 'C:\\rogoyal\dest'
-        customizer-script: 'mkdir C:\\rogoyaltest3'
+        # customizer-destination: 'C:\\rogoyal\dest'
+        customizer-destination: '/tmp/dest'
+        # customizer-script: 'mkdir C:\\rogoyaltest3'
+        customizer-script: 'mkdir /testDir \n sudo cp /tmp/dest/homework /buildArtifacts \n'
         distributor-type: 'sharedgalleryimage'
-        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn'
+        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/rogoyalsiglinux/images/rogoyallinuxdefnnew'
         dist-location: 'eastus'
 
     - name: print aib output
