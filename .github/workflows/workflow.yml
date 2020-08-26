@@ -31,7 +31,7 @@ jobs:
       with:
         location: 'eastus'
         resource-group-name: 'rogoyaltest'
-        managed-identity: 'rogoyal-identity'
+        managed-identity: 'rogoyal-identity-new'
         ## image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
         source-os-type: 'windows'
         source-image-type: 'marketplace'
