@@ -69,7 +69,7 @@ jobs:
         customizer-source: '${{ GITHUB.WORKSPACE }}/homework/hello-world.txt'
         customizer-script: |
           sudo mkdir /buildArtifact1
-          sudo cp -r /tmp/hello-owrld/ /buildArtifact1/hello-world
+          sudo cp -r /tmp/hello-world/ /buildArtifact1/hello-world
         distributor-type: 'SharedGalleryImage'
         #buildTimeoutInMinutes: '1'
         #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'
