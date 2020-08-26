@@ -99,8 +99,8 @@ export default class TaskParameters {
             if (x[x.length - 1] == "") {
                 x[x.length - 1] = x[x.length - 2];
             }
-            //this.buildFolder = x[x.length - 1].split(".")[0];
-            this.buildFolder = x[x.length - 1];
+            this.buildFolder = x[x.length - 1].split(".")[0];
+            //this.buildFolder = x[x.length - 1];
             this.buildPath = path.normalize(bp.trim());
         }
         console.log("customizer source " + this.customizerSource + " and build folder is " + this.buildFolder);
