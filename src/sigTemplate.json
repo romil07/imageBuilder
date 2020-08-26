@@ -61,7 +61,7 @@
         "distribute": [
             {
                 "type": "SharedImage",
-                "galleryImageId": "/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefnlin",
+                "galleryImageId": "/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin",
                 "runOutputName": "",
                 "artifactTags": {
                     "source": "azureVmImageBuilder",
