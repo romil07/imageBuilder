@@ -65,7 +65,7 @@ export default class TaskParameters {
             this.templateJsonFromUser = JSON.parse(JSON.stringify(data));
             console.log(this.templateJsonFromUser);
         }
-
+        console.log("indes of " + this.imagebuilderTemplateName.indexOf("json"));
         this.nowaitMode = tl.getInput(constants.NoWaitMode);
         this.buildTimeoutInMinutes = parseInt(tl.getInput(constants.BuildTimeoutInMinutes));
         //vm size
