@@ -44,7 +44,7 @@ jobs:
           mkdir C:\testDir
           echo "Inline script worked" > C:\testDir\test.txt
         distributor-type: 'sharedgalleryimage'
-        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/sig/images/windowsdefn'
+        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/sig/images/windowsdefn'
         dist-location: 'eastus'
 
     - name: print aib output
