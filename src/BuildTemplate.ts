@@ -115,11 +115,14 @@ export default class BuildTemplate {
             templateJson.properties.customize[0].sourceUri = blobUrl;
             templateJson.properties.customize[0].destination = `${packageName}.tar.gz`;
             // inline += `sudo mkdir -p ${packageName}\n`
-            inline += `sudo mkdir -p ${this._taskParameters.customizerDestination}\n`
+            inline += `sudo mkdir -p ${packageName}\n`
             inline += `sudo tar -xzvf ${templateJson.properties.customize[0].destination} -C ${packageName}\n`
+            inline += `sudo mkdir /buildArtifacts\n`
+            inline += `sudo cp ${packageName} /buildArtifacts/${this._taskParameters.buildFolder}`
             if (this._taskParameters.inlineScript)
                 inline += `${this._taskParameters.inlineScript}\n`;
             templateJson.properties.customize[1].inline = inline.split("\n");
+            console.log("temp folder " + `/buildArtifacts/${this._taskParameters.buildFolder}`);
         }
         else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
             console.log("Inside shell Provisioner");
@@ -162,7 +165,7 @@ export default class BuildTemplate {
             for (var i = fileCustomizer.length - 1; i >= 0; i--) {
                 customizers.unshift(fileCustomizer[i]);
             }
-            
+
             json.properties.customize = customizers;
             console.log("Customzers: \n" + JSON.stringify(customizers));
             if (Utils.IsEqual(this._taskParameters.provisioner, "shell")) {
