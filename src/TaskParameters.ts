@@ -106,6 +106,12 @@ export default class TaskParameters {
         var x = bp.split(path.sep);
         this.buildFolder = x[x.length - 1];
         this.buildPath = path.normalize(bp.trim());
+        if (Utils.IsEqual(this.sourceOSType, "windows")) {
+            this.provisioner = "powershell";
+        }
+        else {
+            this.provisioner = "shell";
+        }
         this.inlineScript = tl.getInput(constants.customizerScript);
         if (Utils.IsEqual(tl.getInput(constants.customizerWindowsUpdate), "true")) {
             this.windowsUpdateProvisioner = true;
