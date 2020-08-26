@@ -140,35 +140,34 @@ export default class ImageBuilder {
 
             var templateStr = JSON.stringify(templateJson);
             console.log("Template json: \n" + templateStr);
-            // await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
-            // this.imgBuilderTemplateExists = true;
+            await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
+            this.imgBuilderTemplateExists = true;
 
-            // await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
-            // var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
-            // var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
-            // core.setOutput('templateName', this.templateName);
-            // core.setOutput('templateId', templateID);
-            // if (out) {
-            //     core.setOutput('customImageURI', out);
-            //     core.setOutput('imagebuilderRunStatus', "succeeded");
-            // }
+            await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
+            var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
+            var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
+            core.setOutput('templateName', this.templateName);
+            core.setOutput('templateId', templateID);
+            if (out) {
+                core.setOutput('customImageURI', out);
+                core.setOutput('imagebuilderRunStatus', "succeeded");
+            }
 
-            // if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
-            //     core.setOutput('pirPublisher', templateJson.properties.source.publisher);
-            //     core.setOutput('pirOffer', templateJson.properties.source.offer);
-            //     core.setOutput('pirSku', templateJson.properties.source.sku);
-            //     core.setOutput('pirVersion', templateJson.properties.source.version);
-            // }
+            if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
+                core.setOutput('pirPublisher', templateJson.properties.source.publisher);
+                core.setOutput('pirOffer', templateJson.properties.source.offer);
+                core.setOutput('pirSku', templateJson.properties.source.sku);
+                core.setOutput('pirVersion', templateJson.properties.source.version);
+            }
 
-            // console.log("==============================================================================")
-            // console.log("## task output variables ##");
-            // console.log("$(imageUri) = ", out);
-            // if (this.isVhdDistribute) {
-            //     console.log("$(templateName) = ", this.templateName);
-            //     console.log("$(templateId) = ", templateID);
-            // }
-            // console.log("==============================================================================")
-
+            console.log("==============================================================================")
+            console.log("## task output variables ##");
+            console.log("$(imageUri) = ", out);
+            if (this.isVhdDistribute) {
+                console.log("$(templateName) = ", this.templateName);
+                console.log("$(templateId) = ", templateID);
+            }
+            console.log("==============================================================================")
         }
         catch (error) {
             throw error;
