@@ -45,7 +45,7 @@ jobs:
         # customizer-script: 'mkdir C:\\rogoyaltest3'
         customizer-script: 'mkdir /testDir \n sudo cp /tmp/dest/homework /buildArtifacts \n'
         distributor-type: 'sharedgalleryimage'
-        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyaltest/providers/Microsoft.Compute/galleries/rogoyalsiglinux/images/rogoyallinuxdefnnew'
+        dist-resource-id: '/subscriptions/439f6f90-fc63-4d40-8a25-33cdf46c730c/resourceGroups/rogoyal/providers/Microsoft.Compute/galleries/rogoyalsiglinux/images/rogoyallinuxdefnnew'
         dist-location: 'eastus'
 
     - name: print aib output
