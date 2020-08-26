@@ -57,8 +57,8 @@ jobs:
         managed-identity: 'aibIdentitySIGLin'
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
-        #imagebuilder-template-name: 'imagetemplatesiglinba'
-        image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
+        imagebuilder-template-name: 'imagetemplatesiglinsig'
+        #image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
         source-os-type: 'linux'
         source-image-type: 'SharedGalleryImage'
         #source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
@@ -66,11 +66,11 @@ jobs:
         #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupMGLin/providers/Microsoft.Compute/images/aibManagedImage'
         source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin/versions/0.24374.10929'
         #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn/versions/0.24373.21584'
-        #customizer-source: '/home/runner/work/AIB_Action/AIB_Action/homework/hello-world.txt'
+        customizer-source: '/home/runner/work/AIB_Action/AIB_Action/homework'
+        customizer-script: |
+          mkdir -p /buildArtifact
+          sudo cp -r "/tmp/homework/" /buildArtifacts/homework
         #customizer-source: '${{ GITHUB.WORKSPACE }}/homework'
-        #customizer-destination: 'c:\\buildartifacts\\'
-        #customizer-destination: '/buildArtifacts/'
-        customizer-destination: '/buildArtifacts/'
         distributor-type: 'SharedGalleryImage'
         #buildTimeoutInMinutes: '1'
         #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'

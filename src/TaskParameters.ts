@@ -7,15 +7,15 @@ var fs = require('fs');
 
 export default class TaskParameters {
     // image builder inputs
-    public location: string = "";
     public resourceGroupName: string;
-    public managedIdentity: string = "";
+    public location: string = "";
     public imagebuilderTemplateName: string;
     public isTemplateJsonProvided: boolean = false;
     public templateJsonFromUser: string = '';
     public nowaitMode: string;
     public buildTimeoutInMinutes: number = 80;
     public vmSize: string = "";
+    public managedIdentity: string = "";
 
     // source
     public sourceImageType: string;
@@ -35,7 +35,6 @@ export default class TaskParameters {
     public windowsUpdateProvisioner: boolean;
 
     public customizerSource: string = "";
-    public customizerDestination: string = "";
     public customizerScript: string = "";
     public customizerWindowsUpdate: string = "";
 
@@ -65,7 +64,6 @@ export default class TaskParameters {
             this.templateJsonFromUser = JSON.parse(JSON.stringify(data));
             console.log(this.templateJsonFromUser);
         }
-        console.log("indes of " + this.imagebuilderTemplateName.indexOf("json"));
         this.nowaitMode = tl.getInput(constants.NoWaitMode);
         this.buildTimeoutInMinutes = parseInt(tl.getInput(constants.BuildTimeoutInMinutes));
         //vm size
@@ -106,20 +104,12 @@ export default class TaskParameters {
 
         this.customizerScript = tl.getInput(constants.customizerScript).toString();
 
-        this.customizerDestination = tl.getInput(constants.customizerDestination);
         if (Utils.IsEqual(this.sourceOSType, "windows")) {
             this.provisioner = "powershell";
-            if (this.customizerDestination == undefined || this.customizerDestination == null || this.customizerDestination == "") {
-                this.customizerDestination = "c:\\";
-            }
         }
         else {
             this.provisioner = "shell";
-            if (this.customizerDestination == undefined || this.customizerDestination == null || this.customizerDestination == "") {
-                this.customizerDestination = "/tmp/";
-            }
         }
-        console.log("provisioner is " + this.provisioner + "  this.customizerDestination  " + this.customizerDestination);
         this.inlineScript = tl.getInput(constants.customizerScript);
         if (Utils.IsEqual(tl.getInput(constants.customizerWindowsUpdate), "true")) {
             this.windowsUpdateProvisioner = true;
