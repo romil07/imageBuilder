@@ -55,7 +55,7 @@ jobs:
         #resource-group-name: 'rg_aib_action_1597077618408'
         #resource-group-name: 'aibResourceGroupSIG'
         managed-identity: 'aibIdentitySIGLin'
-        resource-group-name: 'aibResourceGroupLin1'
+        resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
         image-builder-template-name: 'imagetemplatesiglinsig'
         #image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
