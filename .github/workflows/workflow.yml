@@ -57,7 +57,7 @@ jobs:
         managed-identity: 'aibIdentitySIGLin'
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
-        image-builder-template-name: 'imagetemplatesiglinscript'
+        image-builder-template-name: 'imagetemplatelinsigscript'
         #image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
         source-os-type: 'linux'
         source-image-type: 'marketplace'
