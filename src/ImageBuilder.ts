@@ -214,11 +214,11 @@ export default class ImageBuilder {
     private getTemplateName() {
         if (this._taskParameters.isTemplateJsonProvided) {
             var templateName = this.getTemplateNameFromProvidedJson(this._taskParameters.templateJsonFromUser);
-            return templateName == "" ? constants.imageTemplateName + getCurrentHumanReadableDate() : templateName;
+            return templateName == "" ? constants.imageTemplateName + getCurrentTime() : templateName;
         } else if (!this._taskParameters.isTemplateJsonProvided && this._taskParameters.imagebuilderTemplateName) {
             return this._taskParameters.imagebuilderTemplateName;
         }
-        return constants.imageTemplateName + getCurrentHumanReadableDate();
+        return constants.imageTemplateName + getCurrentTime();
     }
 
     private getRunoutputName() {
