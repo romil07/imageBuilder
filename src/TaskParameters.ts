@@ -131,9 +131,10 @@ export default class TaskParameters {
             throw Error("distribute type is required")
 
         const distResourceId = tl.getInput(constants.DistResourceId);
-        if (!Utils.IsEqual(this.distributeType, "VHD")) {
+        if (!Utils.IsEqual(this.distributeType, "VHD") && distResourceId == "") {
             throw Error("Distributor Resource Id is required");
         }
+        
         const distLocation = tl.getInput(constants.DistLocation);
         if (Utils.IsEqual(this.distributeType, constants.managedImageSourceTypeImage)) {
             this.imageIdForDistribute = distResourceId;

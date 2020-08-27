@@ -107,28 +107,32 @@ export default class BuildTemplate {
         // customize
         if (Utils.IsEqual(this._taskParameters.provisioner, "shell")) {
             var inline: string = "#\n";
-            var packageName = `/tmp/${this._taskParameters.buildFolder}`;
-            templateJson.properties.customize[0].sourceUri = blobUrl;
-            templateJson.properties.customize[0].destination = `${packageName}.tar.gz`;
-            inline += `mkdir -p ${packageName}\n`
-            inline += `sudo tar -xzvf ${templateJson.properties.customize[0].destination} -C ${packageName}\n`
+            if (!(this._taskParameters.buildFolder == "")) {
+                var packageName = `/tmp/${this._taskParameters.buildFolder}`;
+                templateJson.properties.customize[0].sourceUri = blobUrl;
+                templateJson.properties.customize[0].destination = `${packageName}.tar.gz`;
+                inline += `mkdir -p ${packageName}\n`
+                inline += `sudo tar -xzvf ${templateJson.properties.customize[0].destination} -C ${packageName}\n`
+            }
+
             if (this._taskParameters.inlineScript)
                 inline += `${this._taskParameters.inlineScript}\n`;
             templateJson.properties.customize[1].inline = inline.split("\n");
         }
         else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
-            var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
-            // create workflow-artifacts folder
-            var inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
-            // download zip
-            inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
-            // unzip
-            inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
-            console.log("Inside shell Provisioner. Script = " + inline);
+            var inline = "";
+            if (!(this._taskParameters.buildFolder == "")) {
+                var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
+                // create workflow-artifacts folder
+                inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
+                // download zip
+                inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
+                // unzip
+                inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
+            }
+            
             if (this._taskParameters.inlineScript)
                 inline += `${this._taskParameters.inlineScript}\n`;
-            
-            console.log("Properties: \n" + JSON.stringify(templateJson.properties));
             templateJson.properties.customize[0].inline = inline.split("\n");
         }
 
@@ -161,24 +165,29 @@ export default class BuildTemplate {
             json.properties.customize = customizers;
             if (Utils.IsEqual(this._taskParameters.provisioner, "shell")) {
                 var inline: string = "#\n";
-                var packageName = `/tmp/${this._taskParameters.buildFolder}`;
-                console.log("First customizer: \n" + JSON.stringify(json.properties.customize[0]));
-                json.properties.customize[0].sourceUri = blobUrl;
-                json.properties.customize[0].destination = `${packageName}.tar.gz`;
-                inline += `mkdir -p ${packageName}\n`
-                inline += `sudo tar -xzvf ${json.properties.customize[0].destination} -C ${packageName}\n`
+                if (!(this._taskParameters.buildFolder == "")) {
+                    var packageName = `/tmp/${this._taskParameters.buildFolder}`;
+                    json.properties.customize[0].sourceUri = blobUrl;
+                    json.properties.customize[0].destination = `${packageName}.tar.gz`;
+                    inline += `mkdir -p ${packageName}\n`
+                    inline += `sudo tar -xzvf ${json.properties.customize[0].destination} -C ${packageName}\n`
+                }
+                
                 if (this._taskParameters.inlineScript)
                     inline += `${this._taskParameters.inlineScript}\n`;
-                json.properties.customize[1].inline = inline.split("\n");
-                console.log("Final customizer: \n" + JSON.stringify(json.properties.customize[0]));
+                json.properties.customize[1].inline = inline.split("\n");                
             } else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
-                var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
-                // create buildartifacts folder
-                var inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
-                // download zip
-                inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
-                // unzip
-                inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
+                var inline = "";
+                if (!(this._taskParameters.buildFolder == "")) {
+                    var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
+                    // create buildartifacts folder
+                    inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
+                    // download zip
+                    inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
+                    // unzip
+                    inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
+                }
+                
                 if (this._taskParameters.inlineScript)
                     inline += `${this._taskParameters.inlineScript}\n`;
                 json.properties.customize[0].inline = inline.split("\n");

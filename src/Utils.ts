@@ -18,6 +18,11 @@ export const getCurrentTime = (): string => {
     return new Date().getTime().toString();
 }
 
+export const getCurrentHumanReadableDate = (): string => {
+    var date = new Date();
+    return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ":" + date.getMilliseconds();
+}
+
 export class NullOutstreamStringWritable extends stream.Writable {
 
     constructor(options: any) {
