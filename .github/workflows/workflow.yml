@@ -57,7 +57,7 @@ jobs:
         managed-identity: 'aibIdentitySIGLin'
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'rg_aib_action_1597591645408'
-        image-builder-template-name: 'imagetmpsigvhd'
+        image-builder-template-name: 'imagetmpsigvhd11'
         #image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
         source-os-type: 'linux'
         source-image-type: 'SharedGalleryImage'
