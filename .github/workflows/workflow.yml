@@ -54,7 +54,7 @@ jobs:
         location: 'westus'
         #resource-group-name: 'rg_aib_action_1597077618408'
         #resource-group-name: 'aibResourceGroupSIG'
-        anaged-identity: 'aibIdentitySIGLin'
+        managed-identity: 'aibIdentitySIGLin'
         #managed-identity: 'aibIdentity2'
         resource-group-name: 'aibResourceGroupLin'
         #resource-group-name: 'aibRG2'
