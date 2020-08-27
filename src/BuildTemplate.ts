@@ -21,7 +21,7 @@ var defaultTemplate = `
       "distribute": [DISTRIBUTE],
       "vmProfile": {
         "vmSize": "VM_SIZE",
-        "osDiskSize": 136
+        "osDiskSizeGB": 136
         }
     }
   }
