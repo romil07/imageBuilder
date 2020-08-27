@@ -20,7 +20,8 @@ var defaultTemplate = `
       "customize": [CUSTOMIZE],
       "distribute": [DISTRIBUTE],
       "vmProfile": {
-        "vmSize": "VM_SIZE"
+        "vmSize": "VM_SIZE",
+        "osDiskSize": 136
         }
     }
   }
