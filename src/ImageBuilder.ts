@@ -139,7 +139,7 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
-                this.cleanup(subscriptionId);
+                //this.cleanup(subscriptionId);
             }
         }
     }
