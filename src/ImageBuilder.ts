@@ -104,8 +104,6 @@ export default class ImageBuilder {
             await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
             this.imgBuilderTemplateExists = true;
 
-            console.log("Template: \n" + templateJson);
-            console.log("Template: \n" + templateStr);
             await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
             var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
             var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);

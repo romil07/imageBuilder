@@ -130,7 +130,7 @@ export default class BuildTemplate {
                 // unzip
                 inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
             }
-            
+
             if (this._taskParameters.inlineScript)
                 inline += `${this._taskParameters.inlineScript}\n`;
             templateJson.properties.customize[0].inline = inline.split("\n");
@@ -146,8 +146,7 @@ export default class BuildTemplate {
             var regions = this._taskParameters.replicationRegions.split(",");
             templateJson.properties.distribute[0].replicationRegions = regions;
         }
-
-        console.log("Template: \n" + templateJson);
+        
         return templateJson;
     }
 
@@ -159,10 +158,10 @@ export default class BuildTemplate {
         let fileCustomizer: any;
         if (!!this._taskParameters.customizerSource) {
             fileCustomizer = JSON.parse("[" + <string>templateCustomizer.get(this._taskParameters.provisioner) + "]");
-            for (var i = fileCustomizer.length - 1; i >=0; i--) {
+            for (var i = fileCustomizer.length - 1; i >= 0; i--) {
                 customizers.unshift(fileCustomizer[i]);
             }
-            
+
             json.properties.customize = customizers;
             if (Utils.IsEqual(this._taskParameters.provisioner, "shell")) {
                 var inline: string = "#\n";
@@ -173,10 +172,10 @@ export default class BuildTemplate {
                     inline += `mkdir -p ${packageName}\n`
                     inline += `sudo tar -xzvf ${json.properties.customize[0].destination} -C ${packageName}\n`
                 }
-                
+
                 if (this._taskParameters.inlineScript)
                     inline += `${this._taskParameters.inlineScript}\n`;
-                json.properties.customize[1].inline = inline.split("\n");                
+                json.properties.customize[1].inline = inline.split("\n");
             } else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
                 var inline = "";
                 if (!(this._taskParameters.buildFolder == "")) {
@@ -188,13 +187,13 @@ export default class BuildTemplate {
                     // unzip
                     inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
                 }
-                
+
                 if (this._taskParameters.inlineScript)
                     inline += `${this._taskParameters.inlineScript}\n`;
                 json.properties.customize[0].inline = inline.split("\n");
             }
         }
-        
+
         json.properties.customize = customizers;
         return json;
     }
