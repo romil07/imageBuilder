@@ -147,6 +147,7 @@ export default class BuildTemplate {
             templateJson.properties.distribute[0].replicationRegions = regions;
         }
 
+        console.log("Template: \n" + templateJson);
         return templateJson;
     }
 
