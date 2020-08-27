@@ -63,7 +63,7 @@ export default class ImageBuilder {
             // var outStream = '';
             await this.executeAzCliCommand("--version");
 
-            //this.registerFeatures();
+            this.registerFeatures();
 
             //GENERAL INPUTS
             outStream = await this.executeAzCliCommand("account show");
@@ -81,12 +81,11 @@ export default class ImageBuilder {
                     await this.executeAzCliCommand(`group create -n ${resourceGroupName} -l ${this._taskParameters.location}`);
                 }
 
-                console.log("identity-name = " + this.idenityName);
+                console.log("Using Managed Identity " + this.idenityName);
                 imgBuilderId = `/subscriptions/${subscriptionId}/resourcegroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${this.idenityName}`;
+                
                 this.principalId = JSON.parse(await this.executeAzCliCommand(`identity show --resource-group ${this._taskParameters.resourceGroupName} --name ${this.idenityName}`)).principalId;
-
                 await this.createStorageAccount();
-
             } else {
                 var template = JSON.parse(this._taskParameters.templateJsonFromUser);
                 if (this._taskParameters.customizerSource) {
@@ -99,10 +98,9 @@ export default class ImageBuilder {
                     }
                     var name = this.idenityName.split(path.sep);
                     this.idenityName = name[name.length - 1];
-                    console.log("identity-name = " + this.idenityName);
+                    console.log("Using Managed Identity " + this.idenityName);
 
                     this.principalId = JSON.parse(await this.executeAzCliCommand(`identity show --resource-group ${this._taskParameters.resourceGroupName} --name ${this.idenityName}`)).principalId;
-                    console.log("Principal id = " + this.principalId);
                     await this.createStorageAccount();
                 }
             }
@@ -125,7 +123,6 @@ export default class ImageBuilder {
             let templateJson: any = "";
             if (!this._taskParameters.isTemplateJsonProvided) {
                 templateJson = await this._buildTemplate.getTemplate(blobUrl, imgBuilderId, subscriptionId);
-                console.log("Template Json = \n" + templateJson);
             } else {
                 templateJson = this._buildTemplate.addUserCustomisationIfNeeded(blobUrl);
             }
@@ -139,7 +136,6 @@ export default class ImageBuilder {
             this.isVhdDistribute = templateJson.properties.distribute[0].type == "VHD";
 
             var templateStr = JSON.stringify(templateJson);
-            console.log("Template json: \n" + templateStr);
             await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
             this.imgBuilderTemplateExists = true;
 
@@ -175,7 +171,7 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
-                //this.cleanup(this.isVhdDistribute, this.templateName, this.imgBuilderTemplateExists, subscriptionId, this.storageAccount, this.containerName, this.accountkeys, this.idenityName, this.principalId, this.imageRoleDefName);
+                this.cleanup(this.isVhdDistribute, this.templateName, this.imgBuilderTemplateExists, subscriptionId, this.storageAccount, this.containerName, this.principalId);
             }
         }
     }
@@ -251,8 +247,8 @@ export default class ImageBuilder {
 
     private getTemplateName() {
         if (this._taskParameters.isTemplateJsonProvided) {
-            var name = this.getTemplateNameFromProvidedJson(this._taskParameters.templateJsonFromUser);
-            return name == "" ? constants.imageTemplateName + getCurrentTime() : name;
+            var templateName = this.getTemplateNameFromProvidedJson(this._taskParameters.templateJsonFromUser);
+            return templateName == "" ? constants.imageTemplateName + getCurrentTime() : templateName;
         } else if (!this._taskParameters.isTemplateJsonProvided && this._taskParameters.imagebuilderTemplateName) {
             return this._taskParameters.imagebuilderTemplateName;
         }
@@ -364,7 +360,7 @@ export default class ImageBuilder {
         return tempPath;
     }
 
-    private async cleanup(isVhdDistribute: boolean, templateName: string, imgBuilderTemplateExists: boolean, subscriptionId: string, storageAccount: string, containerName: string, accountkeys: string, idenityName: string, principalId: string, imageRoleDefName: string) {
+    private async cleanup(isVhdDistribute: boolean, templateName: string, imgBuilderTemplateExists: boolean, subscriptionId: string, storageAccount: string, containerName: string, principalId: string) {
         try {
             if (!isVhdDistribute && imgBuilderTemplateExists) {
                 await this._aibClient.deleteTemplate(templateName, subscriptionId);
@@ -381,18 +377,6 @@ export default class ImageBuilder {
                 };
                 var response = await this._client.beginRequest(httpRequest);
                 console.log("storage account " + storageAccount + " deleted");
-            }
-            if (roleAssignmentForManagedIdentityExists) {
-                await this.executeAzCliCommand(`role assignment delete --assignee ${principalId} --role ${imageRoleDefName} --scope /subscriptions/${subscriptionId}/resourceGroups/${this._taskParameters.resourceGroupName}`);
-                console.log("role assignment deleted");
-            }
-            if (managedIdentityExists) {
-                await this.executeAzCliCommand(`identity delete -n ${idenityName} -g ${this._taskParameters.resourceGroupName}`);
-                console.log(`identity ${idenityName} deleted`);
-            }
-            if (roleDefinitionExists) {
-                await this.executeAzCliCommand(`role definition delete --name ${imageRoleDefName}`);
-                console.log(`role definition ${imageRoleDefName} deleted`);
             }
         }
         catch (error) {
@@ -419,7 +403,7 @@ export default class ImageBuilder {
     }
 
     private sleepFor(sleepDurationInSeconds: any): Promise<any> {
-        return new Promise((resolve, reeject) => {
+        return new Promise((resolve) => {
             setTimeout(resolve, sleepDurationInSeconds * 1000);
         });
     }

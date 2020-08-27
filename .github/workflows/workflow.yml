@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [ master ]
+    branches: [ master]
 
 jobs:
   job1:
@@ -32,7 +32,7 @@ jobs:
         location: 'eastus'
         resource-group-name: 'rogoyaltest'
         managed-identity: 'rogoyal-identity-new'
-        ## image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
+        # image-builder-template-name: '${{ github.workspace }}/src/sourceTemplate.json'
         source-os-type: 'windows'
         source-image-type: 'marketplace'
         # source-image: Canonical:UbuntuServer:18.04-DAILY-LTS:latest

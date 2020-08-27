@@ -28,8 +28,8 @@ export default class TaskParameters {
     public imageSku: string = "";
 
     //customize
-    public buildPath: string;
-    public buildFolder: string;
+    public buildPath: string = "";
+    public buildFolder: string = "";
     public blobName: string = "";
     public inlineScript: string;
     public provisioner: string = "";
@@ -59,8 +59,8 @@ export default class TaskParameters {
         if (!(locations.indexOf(this.location.toString().replace(/\s/g, "").toLowerCase()) > -1)) {
             throw new Error("location not from available regions or it is not defined");
         }
-        this.resourceGroupName = tl.getInput(constants.ResourceGroupName, {required: true});
-        this.managedIdentity = tl.getInput(constants.ManagedIdentity, {required: true});
+        this.resourceGroupName = tl.getInput(constants.ResourceGroupName, { required: true });
+        this.managedIdentity = tl.getInput(constants.ManagedIdentity, { required: true });
         this.imagebuilderTemplateName = tl.getInput(constants.ImageBuilderTemplateName);
         if (this.imagebuilderTemplateName.indexOf("json") > -1) {
             this.isTemplateJsonProvided = true;
@@ -94,18 +94,23 @@ export default class TaskParameters {
 
         //customize inputs
         this.customizerSource = tl.getInput(constants.CustomizerSource).toString();
-        if (this.customizerSource == undefined || this.customizerSource == "") {
+        if (this.customizerSource == undefined || this.customizerSource == "" || this.customizerSource == null) {
             var artifactsPath = path.join(`${process.env.GITHUB_WORKSPACE}`, "imageArtifacts");
             if (fs.existsSync(artifactsPath)) {
                 this.customizerSource = artifactsPath;
             }
         }
-        this.customizerScript = tl.getInput(constants.customizerScript).toString();
 
-        var bp = this.customizerSource;
-        var x = bp.split(path.sep);
-        this.buildFolder = x[x.length - 1];
-        this.buildPath = path.normalize(bp.trim());
+        if (!(this.customizerSource == undefined || this.customizerSource == '' || this.customizerSource == null)) {
+            var bp = this.customizerSource;
+            var x = bp.split(path.sep);
+            this.buildFolder = x[x.length - 1].split(".")[0];
+            this.buildPath = path.normalize(bp.trim());
+            console.log("Customizer source: " + this.customizerSource);
+            console.log("Artifacts folder: " + this.buildFolder);
+        }
+
+        this.customizerScript = tl.getInput(constants.customizerScript).toString();
         if (Utils.IsEqual(this.sourceOSType, "windows")) {
             this.provisioner = "powershell";
         }
@@ -121,8 +126,14 @@ export default class TaskParameters {
         }
 
         //distribute inputs
-        this.distributeType = tl.getInput(constants.DistributeType);
+        this.distributeType = tl.getInput(constants.DistributeType, { required: true });
+        if (!this.distributeType)
+            throw Error("distribute type is required")
+
         const distResourceId = tl.getInput(constants.DistResourceId);
+        if (!Utils.IsEqual(this.distributeType, "VHD")) {
+            throw Error("Distributor Resource Id is required");
+        }
         const distLocation = tl.getInput(constants.DistLocation);
         if (Utils.IsEqual(this.distributeType, constants.managedImageSourceTypeImage)) {
             this.imageIdForDistribute = distResourceId;

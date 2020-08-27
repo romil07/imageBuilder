@@ -2,8 +2,8 @@
 export var Location = "location";
 export var ResourceGroupName = "resource-group-name";
 export var ImageBuilderTemplateName = "image-builder-template-name";
-export var NoWaitMode = "nowaitMode";
-export var BuildTimeoutInMinutes = "buildTimeoutInMinutes";
+export var NoWaitMode = "no-wait-Mode";
+export var BuildTimeoutInMinutes = "build-timeout-in-minutes";
 export var VMSize = "vm-size";
 export var ManagedIdentity = "managed-identity";
 

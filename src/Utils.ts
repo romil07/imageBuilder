@@ -14,6 +14,7 @@ export default class Utils {
 }
 
 export const getCurrentTime = (): string => {
+    // TODO: Should this be a human readable date value or Epoch time is fine?
     return new Date().getTime().toString();
 }
 
