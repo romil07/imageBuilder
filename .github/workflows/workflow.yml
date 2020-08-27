@@ -54,29 +54,29 @@ jobs:
         location: 'westus'
         #resource-group-name: 'rg_aib_action_1597077618408'
         #resource-group-name: 'aibResourceGroupSIG'
-        #managed-identity: 'aibIdentitySIGLin'
-        managed-identity: 'aibIdentity2'
-        #resource-group-name: 'aibResourceGroupLin'
-        resource-group-name: 'aibRG2'
+        anaged-identity: 'aibIdentitySIGLin'
+        #managed-identity: 'aibIdentity2'
+        resource-group-name: 'aibResourceGroupLin'
+        #resource-group-name: 'aibRG2'
         #resource-group-name: 'rg_aib_action_1597591645408'
         #image-builder-template-name: 'imagetmpsigvhd11'
         #image-builder-template-name: '${{ GITHUB.WORKSPACE }}/src/sigTemplate.json'
         source-os-type: 'linux'
-        source-image-type: 'marketplace'
+        source-image-type: 'SharedGalleryImage'
         #source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest
-        source-image: Canonical:UbuntuServer:18.04-DAILY-LTS:latest
+        #source-image: Canonical:UbuntuServer:18.04-DAILY-LTS:latest
         #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/images/aibManagedImageLin'
-        #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin/versions/0.24374.10929'
+        source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin/versions/0.24374.10929'
         #source-image: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupSIG/providers/Microsoft.Compute/galleries/sharedImageGallery/images/imgdefn/versions/0.24373.21584'
         customizer-source: '${{ GITHUB.WORKSPACE }}/homework/hello-world.txt'
         customizer-script: |
           sudo mkdir /buildArtifactvhd
           sudo cp -r /tmp/hello-world/ /buildArtifactvhd/hello-world
-        distributor-type: 'SharedGalleryImage'
+        distributor-type: 'VHD'
         #buildTimeoutInMinutes: '1'
         #dist-resource-id: '/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourceGroups/aibResourceGroup/providers/Microsoft.Compute/galleries/myaibsig01/images/winSvrimages'
         #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/galleries/sharedImageGalleryLin/images/imgdefnlin'
-        dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibRG2/providers/Microsoft.Compute/galleries/sharedImageGallery2/images/imgdefn2'
+        #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibRG2/providers/Microsoft.Compute/galleries/sharedImageGallery2/images/imgdefn2'
         #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupLin/providers/Microsoft.Compute/images/aibManagedImageLin'
         #dist-resource-id: '/subscriptions/f9b6b78c-2720-4293-9fc7-2c38fcebb2c6/resourceGroups/aibResourceGroupMGLin/providers/Microsoft.Compute/images/aibManagedImage'
         dist-location: 'westus'
