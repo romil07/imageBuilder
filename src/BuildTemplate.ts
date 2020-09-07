@@ -1,7 +1,7 @@
 "use strict";
 import path = require("path");
 import TaskParameters from "./TaskParameters";
-import Utils from "./Utils";
+import Utils, { getCurrentTime } from "./Utils";
 import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { WebRequest } from 'azure-actions-webclient/WebClient';
 import { ServiceClient as AzureRestClient, ToError, AzureError } from 'azure-actions-webclient/AzureRestClient';
@@ -27,19 +27,20 @@ var defaultTemplate = `
 `
 var templateSource = new Map([
     ["managedimage", `{"type": "ManagedImage", "imageId": "IMAGE_ID"}`],
-    ["sharedgalleryimage", `{"type": "SharedImageVersion", "imageVersionId": "IMAGE_ID"}`],
-    ["marketplace", `{"type": "PlatformImage", "publisher": "PUBLISHER_NAME", "offer": "OFFER_NAME","sku": "SKU_NAME", "version": "VERSION"}`]
+    ["sharedimagegallery", `{"type": "SharedImageVersion", "imageVersionId": "IMAGE_ID"}`],
+    ["platformimage", `{"type": "PlatformImage", "publisher": "PUBLISHER_NAME", "offer": "OFFER_NAME","sku": "SKU_NAME", "version": "VERSION"}`]
 ])
 
 var templateCustomizer = new Map([
     ["shell", `{"type": "File", "name": "aibaction_file_copy", "sourceUri": "", "destination": ""},{"type": "Shell", "name": "aibaction_inline", "inline":[]}`],
+    ["shellInline", `{"type": "Shell", "name": "aibaction_inline", "inline":[]}`],
     ["powershell", `{"type": "PowerShell", "name": "aibaction_inline", "inline":[]}`],
     ["windowsUpdate", `{"type": "PowerShell", "name": "5minWait_is_needed_before_windowsUpdate", "inline":["Start-Sleep -Seconds 300"]},{"type": "WindowsUpdate", "searchCriteria": "IsInstalled=0", "filters": ["exclude:$_.Title -like '*Preview*'", "include:$true"]}`]
 ])
 
 var templateDistribute = new Map([
-    ["managedimage", `{"type": "ManagedImage", "imageId": "IMAGE_ID", "location": "", "runOutputName": "ManagedImage_distribute"}`],
-    ["sharedgalleryimage", `{"type": "SharedImage", "galleryImageId": "IMAGE_ID", "replicationRegions": [], "runOutputName": "SharedImage_distribute"}`],
+    ["managedimage", `{"type": "ManagedImage", "imageId": "IMAGE_ID", "location": "", "runOutputName": "ManagedImage_distribute", "artifactTags": {"RunURL": "URL", "GitHubRepo": "GITHUB_REPO", "GithubCommit": "GITHUB_COMMIT"}}`],
+    ["sharedimagegallery", `{"type": "SharedImage", "galleryImageId": "IMAGE_ID", "replicationRegions": [], "runOutputName": "SharedImage_distribute", "artifactTags": {"RunURL": "URL", "GitHubRepo": "GITHUB_REPO", "GithubCommit": "GITHUB_COMMIT"}}`],
     ["vhd", `{"type": "VHD", "runOutputName": "VHD_distribute"}`]
 ])
 
@@ -83,7 +84,13 @@ export default class BuildTemplate {
         template = template.replace("VM_SIZE", this._taskParameters.vmSize);
         template = template.replace("SOURCE", <string>templateSource.get(this._taskParameters.sourceImageType.toLowerCase()));
         template = template.replace("DISTRIBUTE", <string>templateDistribute.get(this._taskParameters.distributeType.toLowerCase()));
-        var customizers = templateCustomizer.get(this._taskParameters.provisioner);
+        var customizers: any;
+        if (Utils.IsEqual(this._taskParameters.provisioner, "shell") && (this._taskParameters.customizerSource == undefined || this._taskParameters.customizerSource.length == 0)) {
+            customizers = templateCustomizer.get("shellInline");
+        }
+        else {
+            customizers = templateCustomizer.get(this._taskParameters.provisioner);
+        }
         if (Utils.IsEqual(this._taskParameters.provisioner, "powershell") && this._taskParameters.windowsUpdateProvisioner)
             customizers = customizers + "," + templateCustomizer.get("windowsUpdate");
         template = template.replace("CUSTOMIZE", <string>customizers);
@@ -113,21 +120,21 @@ export default class BuildTemplate {
                 templateJson.properties.customize[0].destination = `${packageName}.tar.gz`;
                 inline += `mkdir -p ${packageName}\n`
                 inline += `sudo tar -xzvf ${templateJson.properties.customize[0].destination} -C ${packageName}\n`
+                if (this._taskParameters.inlineScript)
+                    inline += `${this._taskParameters.inlineScript}\n`;
+                templateJson.properties.customize[1].inline = inline.split("\n");
             }
-
-            if (this._taskParameters.inlineScript)
-                inline += `${this._taskParameters.inlineScript}\n`;
-            templateJson.properties.customize[1].inline = inline.split("\n");
+            else {
+                if (this._taskParameters.inlineScript)
+                    inline += `${this._taskParameters.inlineScript}\n`;
+                templateJson.properties.customize[0].inline = inline.split("\n");
+            }
         }
         else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
             var inline = "";
             if (!(this._taskParameters.buildFolder == "")) {
-                var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
-                // create workflow-artifacts folder
-                inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
-                // download zip
+                var packageName = "c:\\" + this._taskParameters.buildFolder;
                 inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
-                // unzip
                 inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
             }
 
@@ -137,7 +144,13 @@ export default class BuildTemplate {
         }
 
         if (Utils.IsEqual(templateJson.properties.distribute[0].type, "ManagedImage")) {
-            templateJson.properties.distribute[0].imageId = this._taskParameters.imageIdForDistribute;
+            if (this._taskParameters.imageIdForDistribute == "" || this._taskParameters.imageIdForDistribute == undefined) {
+                var imageDefn = "mi_" + getCurrentTime();
+                templateJson.properties.distribute[0].imageId = `/subscriptions/${subscriptionId}/resourceGroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.Compute/images/${imageDefn}`;
+            }
+            else {
+                templateJson.properties.distribute[0].imageId = this._taskParameters.imageIdForDistribute;
+            }
             templateJson.properties.distribute[0].location = this._taskParameters.managedImageLocation;
         }
 
@@ -146,7 +159,12 @@ export default class BuildTemplate {
             var regions = this._taskParameters.replicationRegions.split(",");
             templateJson.properties.distribute[0].replicationRegions = regions;
         }
-        
+        if (Utils.IsEqual(templateJson.properties.distribute[0].type, "SharedImage") || Utils.IsEqual(templateJson.properties.distribute[0].type, "ManagedImage")) {
+            templateJson.properties.distribute[0].artifactTags.RunURL = process.env.GITHUB_SERVER_URL + "/" + process.env.GITHUB_REPOSITORY + "/actions/runs/" + process.env.GITHUB_RUN_ID;
+            templateJson.properties.distribute[0].artifactTags.GitHubRepo = process.env.GITHUB_REPOSITORY;
+            templateJson.properties.distribute[0].artifactTags.GithubCommit = process.env.GITHUB_SHA;
+        }
+
         return templateJson;
     }
 
@@ -157,6 +175,13 @@ export default class BuildTemplate {
         // add customization for custom source
         let fileCustomizer: any;
         if (!!this._taskParameters.customizerSource) {
+            let windowsUpdateCustomizer: any;
+            if (Utils.IsEqual(this._taskParameters.provisioner, "powershell") && this._taskParameters.windowsUpdateProvisioner) {
+                windowsUpdateCustomizer = JSON.parse("[" + <string>templateCustomizer.get("windowsUpdate") + "]");
+                for (var i = windowsUpdateCustomizer.length - 1; i >= 0; i--) {
+                    customizers.unshift(windowsUpdateCustomizer[i]);
+                }
+            }
             fileCustomizer = JSON.parse("[" + <string>templateCustomizer.get(this._taskParameters.provisioner) + "]");
             for (var i = fileCustomizer.length - 1; i >= 0; i--) {
                 customizers.unshift(fileCustomizer[i]);
@@ -179,12 +204,8 @@ export default class BuildTemplate {
             } else if (Utils.IsEqual(this._taskParameters.provisioner, "powershell")) {
                 var inline = "";
                 if (!(this._taskParameters.buildFolder == "")) {
-                    var packageName = "c:\\workflow-artifacts\\" + this._taskParameters.buildFolder;
-                    // create buildartifacts folder
-                    inline = `New-item -Path c:\\workflow-artifacts -itemtype directory\n`
-                    // download zip
+                    var packageName = "c:\\" + this._taskParameters.buildFolder;
                     inline += `Invoke-WebRequest -Uri '${blobUrl}' -OutFile ${packageName}.zip -UseBasicParsing\n`
-                    // unzip
                     inline += `Expand-Archive -Path ${packageName}.zip -DestinationPath ${packageName}\n`
                 }
 

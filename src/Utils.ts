@@ -1,8 +1,5 @@
 "use strict";
 import stream = require('stream');
-import * as os from 'os';
-
-export const TEMP_DIRECTORY: string = process.env.RUNNER_TEMP || os.tmpdir();
 
 export default class Utils {
     public static IsEqual(a: string, b: string): boolean {
@@ -14,13 +11,7 @@ export default class Utils {
 }
 
 export const getCurrentTime = (): string => {
-    // TODO: Should this be a human readable date value or Epoch time is fine?
     return new Date().getTime().toString();
-}
-
-export const getCurrentHumanReadableDate = (): string => {
-    var date = new Date();
-    return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ":" + date.getMilliseconds();
 }
 
 export class NullOutstreamStringWritable extends stream.Writable {

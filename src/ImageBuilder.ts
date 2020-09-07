@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as io from '@actions/io';
 import TaskParameters from "./TaskParameters";
-import { getCurrentTime, getCurrentHumanReadableDate } from "./Utils";
+import { getCurrentTime, NullOutstreamStringWritable } from "./Utils";
 import ImageBuilderClient from "./AzureImageBuilderClient";
 import BuildTemplate from "./BuildTemplate";
 import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
@@ -52,7 +52,7 @@ export default class ImageBuilder {
         try {
             azPath = await io.which("az", true);
             core.debug("Az module path: " + azPath);
-            // var outStream = '';
+            var outStream = '';
             await this.executeAzCliCommand("--version");
             await this.registerFeatures();
 
@@ -62,13 +62,22 @@ export default class ImageBuilder {
 
             var isCreateBlob = false;
             var imgBuilderId = "";
-            
+
             if (this._taskParameters.customizerSource != undefined && this._taskParameters.customizerSource != "") {
                 isCreateBlob = true;
             }
 
             if (!this._taskParameters.isTemplateJsonProvided) {
-                imgBuilderId = `/subscriptions/${subscriptionId}/resourcegroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${this.idenityName}`;
+                if (this.idenityName.startsWith("/subscriptions/")) {
+                    imgBuilderId = this.idenityName;
+                }
+                else {
+                    imgBuilderId = `/subscriptions/${subscriptionId}/resourcegroups/${this._taskParameters.resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${this.idenityName}`;
+                }
+            }
+            else {
+                var template = JSON.parse(this._taskParameters.templateJsonFromUser);
+                this._taskParameters.location = template.location;
             }
 
             console.log("Using Managed Identity " + this.idenityName);
@@ -78,7 +87,7 @@ export default class ImageBuilder {
                 await this.createStorageAccount();
                 this._blobService = azure.createBlobService(this.storageAccount, this.accountkeys);
                 this.containerName = constants.containerName;
-                var blobName : string = this._taskParameters.buildFolder + "/" + process.env.GITHUB_RUN_ID + "/" + this._taskParameters.buildFolder + `_${getCurrentTime()}`;
+                var blobName: string = this._taskParameters.buildFolder + "/" + process.env.GITHUB_RUN_ID + "/" + this._taskParameters.buildFolder + `_${getCurrentTime()}`;
                 if (Utils.IsEqual(this._taskParameters.provisioner, "powershell"))
                     blobName = blobName + '.zip';
                 else
@@ -89,6 +98,7 @@ export default class ImageBuilder {
             }
 
             let templateJson: any = "";
+
             if (!this._taskParameters.isTemplateJsonProvided) {
                 templateJson = await this._buildTemplate.getTemplate(blobUrl, imgBuilderId, subscriptionId);
             } else {
@@ -100,19 +110,23 @@ export default class ImageBuilder {
             templateJson.properties.distribute[0].runOutputName = runOutputName;
             this.isVhdDistribute = templateJson.properties.distribute[0].type == "VHD";
 
-            var templateStr = JSON.stringify(templateJson);
+            var templateStr = JSON.stringify(templateJson, null, 2);
+            console.log("Template Name: " + this.templateName);
+            console.log("Template: \n" + templateStr);
             await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
             this.imgBuilderTemplateExists = true;
 
             await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
             var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
             var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
+            var imagebuilderRunStatus = "failed";
             core.setOutput('templateName', this.templateName);
             core.setOutput('templateId', templateID);
-            core.setOutput('runOutputName', runOutputName);
+            core.setOutput('run-output-name', runOutputName);
             if (out) {
-                core.setOutput('customImageURI', out);
-                core.setOutput('imagebuilderRunStatus', "succeeded");
+                core.setOutput('custom-image-uri', out);
+                core.setOutput('imagebuilder-run-status', "succeeded");
+                imagebuilderRunStatus = "succeeded";
             }
 
             if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
@@ -124,6 +138,7 @@ export default class ImageBuilder {
 
             console.log("==============================================================================")
             console.log("## task output variables ##");
+            console.log("$(imagebuilder-run-status) = ", imagebuilderRunStatus);
             console.log("$(imageUri) = ", out);
             if (this.isVhdDistribute) {
                 console.log("$(templateName) = ", this.templateName);
@@ -362,7 +377,7 @@ export default class ImageBuilder {
                 await this._aibClient.deleteTemplate(this.templateName, subscriptionId);
                 console.log(`${this.templateName} got deleted`);
             }
-            
+
             if (storageAccountExists) {
                 let httpRequest: WebRequest = {
                     method: 'DELETE',
@@ -379,8 +394,8 @@ export default class ImageBuilder {
 
     async executeAzCliCommand(command: string): Promise<string> {
         var outStream: string = '';
-        console.log("az cli command " + command);
         var execOptions: any = {
+            outStream: new NullOutstreamStringWritable({ decodeStrings: false }),
             listeners: {
                 stdout: (data: any) => outStream += data.toString(),
             }

@@ -61,9 +61,6 @@ export default class ImageBuilderClient {
         }
     }
 
-    /**
-     * postTemplate
-     */
     public async runTemplate(templateName: string, subscriptionId: string, timeOutInMinutes: number) {
         try {
             console.log("Starting run template...");
@@ -129,7 +126,7 @@ export default class ImageBuilderClient {
                 else if (response.body && response.body.properties.artifactUri)
                     output = response.body.properties.artifactUri;
                 else
-                    console.log(`Error to parse response.body -- ${response.body}.`);
+                    console.log(`Error in parsing response.body -- ${response.body}.`);
             }
         }
         catch (error) {
@@ -161,12 +158,9 @@ export default class ImageBuilderClient {
                 if (response.body && response.body.status) {
                     core.debug(response.body.status);
                 }
-                // If timeout; throw;
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
                     throw Error(`error in url`);
                 }
-
-                // Retry after given interval.
                 var sleepDuration = 15;
                 await this.sleepFor(sleepDuration);
             } else {
