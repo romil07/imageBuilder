@@ -10,8 +10,8 @@ async function main(): Promise<void> {
 
 main().then()
     .catch((error) => {
-        core.setOutput('imagebuilderRunStatus', "failed");
+        console.log("$(imagebuilder-run-status) = ", "failed");
+        core.setOutput('imagebuilder-run-status', "failed");
         core.error(error);
         core.setFailed("Action run failed.");
     });
-
