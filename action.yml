@@ -5,9 +5,9 @@ inputs:
    #general inputs
    location:
       description: 'This is the Azure region in which the Image Builder will run.'
-      required: true
    resource-group-name:
       description: 'This is the Resource Group where the temporary Imagebuilder Template resource will be created.'
+      required: true
    image-builder-template-name:
       description: 'The name of the image builder template resource to be used for creating and running the Image builder service.'
    build-timeout-in-minutes:
@@ -28,7 +28,6 @@ inputs:
       required: true
    source-image:
       description: 'Value of source-image supported by Azure Image Builder.'
-      required: true
       
    #customization inouts
    customizer-source:

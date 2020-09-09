@@ -25,6 +25,7 @@ export var DistributeType = "dist-type";
 export var DistResourceId = "dist-resource-id";
 export var DistLocation = "dist-location";
 export var RunOutputName = "run-output-name";
+export var DistImageTags = "dist-image-tags";
 
 export var storageAccountName = "strgacc";
 export var containerName = "imagebuilder-aib-action";

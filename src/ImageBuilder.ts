@@ -394,10 +394,14 @@ export default class ImageBuilder {
 
     async executeAzCliCommand(command: string): Promise<string> {
         var outStream: string = '';
+        var errorStream: string = '';
         var execOptions: any = {
             outStream: new NullOutstreamStringWritable({ decodeStrings: false }),
             listeners: {
                 stdout: (data: any) => outStream += data.toString(),
+                errline: (data: string) => {
+                    errorStream += data;
+                }
             }
         };
         try {
@@ -405,8 +409,10 @@ export default class ImageBuilder {
             return outStream;
         }
         catch (error) {
-            core.setFailed("Action run failed");
-            throw error;
+            if (errorStream != '')
+                throw (`${errorStream} ${error}`);
+            else
+                throw (`${error}`);
         }
     }
 

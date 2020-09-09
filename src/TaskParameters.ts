@@ -44,6 +44,7 @@ export default class TaskParameters {
     public managedImageLocation: string = "";
     public galleryImageId: string = "";
     public runOutputName: string;
+    public distImageTags: string = "";
 
     constructor() {
         var locations = ["eastus", "eastus2", "westcentralus", "westus", "westus2", "northeurope", "westeurope"];
@@ -143,6 +144,7 @@ export default class TaskParameters {
                 this.galleryImageId = distResourceId;
                 this.replicationRegions = distLocation;
             }
+            this.distImageTags = tl.getInput(constants.DistImageTags);
         }
 
         this.runOutputName = tl.getInput(constants.RunOutputName);
